@@ -29,9 +29,8 @@ export function AppSidebar({ topics, selectedTopic, onTopicChange }: AppSidebarP
     <Sidebar className="border-r border-border">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-lg font-semibold px-4 py-3">
-            <Code className="mr-2 h-5 w-5 inline" />
-            Programming Topics
+          <SidebarGroupLabel className="text-lg font-semibold px-4 py-7">
+            Goals
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -43,7 +42,7 @@ export function AppSidebar({ topics, selectedTopic, onTopicChange }: AppSidebarP
                     className="w-full justify-start px-4 py-3"
                   >
                     <topic.icon className="mr-3 h-4 w-4" />
-                    <span>{topic.title}</span>
+                    <span className="text-lg">{topic.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

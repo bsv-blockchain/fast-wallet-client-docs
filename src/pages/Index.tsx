@@ -7,7 +7,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { topicsData } from "@/data/topics";
 
 const Index = () => {
-  const [selectedTopic, setSelectedTopic] = useState("javascript-basics");
+  const [selectedTopic, setSelectedTopic] = useState("tokens");
 
   const currentTopic = topicsData.find(topic => topic.id === selectedTopic);
 
@@ -19,17 +19,17 @@ const Index = () => {
           selectedTopic={selectedTopic}
           onTopicChange={setSelectedTopic}
         />
-        <main className="flex-1 p-6 overflow-auto">
+        <main className="flex-1 p-6 mt-10 overflow-auto">
           <div className="max-w-4xl mx-auto space-y-8">
             <div className="text-center mb-12 relative">
               <div className="absolute top-0 right-0">
                 <ThemeToggle />
               </div>
               <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Developer Tools Demo
+                WalletClient Quickstart
               </h1>
               <p className="text-xl text-muted-foreground">
-                Interactive code snippets to learn programming concepts
+                Interactive code snippets to learn BSV Blockchain development
               </p>
             </div>
             

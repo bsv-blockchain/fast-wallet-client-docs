@@ -7,12 +7,18 @@ import { toast } from "@/hooks/use-toast";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useTheme } from "@/components/ThemeProvider";
+import { createToken } from '../data/snippets/create-token'
+
+const functionsAsExecutable = {
+  createToken
+}
 
 interface Snippet {
   id: string;
   title: string;
   explanation: string;
   code: string;
+  compiledCode: string;
   language: string;
 }
 
@@ -35,11 +41,6 @@ export function CodeSnippet({ snippet, index }: CodeSnippetProps) {
   };
 
   const runCode = async () => {
-    if (snippet.language !== "typescript" && snippet.language !== "javascript") {
-      setOutput("Only JavaScript/TypeScript code can be executed in this demo.");
-      return;
-    }
-
     setIsRunning(true);
     setOutput("");
 
@@ -48,15 +49,18 @@ export function CodeSnippet({ snippet, index }: CodeSnippetProps) {
       const logs: string[] = [];
       const customConsole = {
         log: (...args: any[]) => {
-          logs.push(args.map(arg => 
-            typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
-          ).join(' '));
+          logs.push(args.map(arg => {
+            if (arg?.tx) {
+              arg.tx = ['large number array hidden for clarity, see network tab for actual data']
+            }
+            return typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+          }).join(' '));
         }
       };
 
       // Create a function that runs the code with custom console
-      const runUserCode = new Function('console', snippet.code);
-      runUserCode(customConsole);
+      const runUserCode = functionsAsExecutable[snippet.id]
+      await runUserCode(customConsole);
 
       setOutput(logs.length > 0 ? logs.join('\n') : "Code executed successfully (no output)");
     } catch (error) {
@@ -109,7 +113,7 @@ export function CodeSnippet({ snippet, index }: CodeSnippetProps) {
             <span>{snippet.language}</span>
           </div>
           <SyntaxHighlighter
-            language={snippet.language === "typescript" ? "typescript" : "javascript"}
+            language="typescript"
             style={getSyntaxTheme()}
             customStyle={{
               margin: 0,
@@ -122,28 +126,25 @@ export function CodeSnippet({ snippet, index }: CodeSnippetProps) {
             {snippet.code}
           </SyntaxHighlighter>
         </div>
+        <div className="space-y-3">
+          <Button
+            onClick={runCode}
+            disabled={isRunning}
+            className="bg-green-600 hover:bg-green-700 text-white transition-all duration-200"
+          >
+            <Play className="mr-2 h-4 w-4" />
+            {isRunning ? "Running..." : "Run Code"}
+          </Button>
 
-        {(snippet.language === "javascript" || snippet.language === "typescript") && (
-          <div className="space-y-3">
-            <Button
-              onClick={runCode}
-              disabled={isRunning}
-              className="bg-green-600 hover:bg-green-700 text-white transition-all duration-200"
-            >
-              <Play className="mr-2 h-4 w-4" />
-              {isRunning ? "Running..." : "Run Code"}
-            </Button>
-
-            {output && (
-              <div className="bg-muted/50 rounded-lg p-4 border">
-                <h4 className="text-sm font-medium text-foreground mb-2">Output:</h4>
-                <pre className="text-sm text-muted-foreground whitespace-pre-wrap">
-                  {output}
-                </pre>
-              </div>
-            )}
-          </div>
-        )}
+          {output && (
+            <div className="bg-muted/50 rounded-lg p-4 border">
+              <h4 className="text-sm font-medium text-foreground mb-2">Output:</h4>
+              <pre className="text-sm text-muted-foreground whitespace-pre-wrap">
+                {output}
+              </pre>
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

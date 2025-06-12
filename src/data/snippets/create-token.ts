@@ -2,7 +2,7 @@ import { WalletClient, Script } from '@bsv/sdk'
 
 export async function createToken(runner) {
 
-    // Create a WalletClient instance
+    // Connect to user's wallet
     const wallet = new WalletClient()
 
     // Create a token which represents an event ticket

@@ -1,6 +1,6 @@
 import { Code } from "lucide-react";
 import createToken from './snippets/create-token.ts?raw';
-import createTokenCode from './snippets/create-token.js?raw';
+import listTokens from './snippets/list-tokens.ts?raw';
 
 export const topicsData = [
   {
@@ -10,10 +10,16 @@ export const topicsData = [
     snippets: [
       {
         id: "createToken",
-        title: "Create a Token",
-        explanation: "Create a token which represents an event ticket.",
+        title: "Create a token",
+        explanation: "Create a token which represents an event ticket, and store it in a basket within the user's wallet.",
         code: createToken,
-        compiledCode: createTokenCode,
+        language: "typescript"
+      },
+      {
+        id: "listTokens",
+        title: "List tokens",
+        explanation: "Retrieve a list of tokens fromn the user within a specified basket.",
+        code: listTokens,
         language: "typescript"
       }
     ]

@@ -8,9 +8,11 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useTheme } from "@/components/ThemeProvider";
 import { createToken } from '../data/snippets/create-token'
+import { listTokens } from '../data/snippets/list-tokens'
 
 const functionsAsExecutable = {
-  createToken
+  createToken,
+  listTokens,
 }
 
 interface Snippet {

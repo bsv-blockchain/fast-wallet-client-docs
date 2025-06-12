@@ -6,7 +6,6 @@ interface Snippet {
   title: string;
   explanation: string;
   code: string;
-  language: string;
 }
 
 interface CodeSnippetContainerProps {

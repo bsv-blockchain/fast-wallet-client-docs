@@ -7,21 +7,13 @@ import { toast } from "@/hooks/use-toast";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useTheme } from "@/components/ThemeProvider";
-import { createToken } from '../data/snippets/create-token'
-import { listTokens } from '../data/snippets/list-tokens'
-
-const functionsAsExecutable = {
-  createToken,
-  listTokens,
-}
+import snippets from '../data/snippets'
 
 interface Snippet {
   id: string;
   title: string;
   explanation: string;
   code: string;
-  compiledCode: string;
-  language: string;
 }
 
 interface CodeSnippetProps {
@@ -60,9 +52,8 @@ export function CodeSnippet({ snippet, index }: CodeSnippetProps) {
         }
       };
 
-      // Create a function that runs the code with custom console
-      const runUserCode = functionsAsExecutable[snippet.id]
-      await runUserCode(customConsole);
+      // Run the code snippet, send the logs to the output
+      await snippets[snippet.id](customConsole);
 
       setOutput(logs.length > 0 ? logs.join('\n') : "Code executed successfully (no output)");
     } catch (error) {
@@ -112,7 +103,7 @@ export function CodeSnippet({ snippet, index }: CodeSnippetProps) {
         
         <div className="rounded-lg overflow-hidden border">
           <div className="bg-muted/80 px-4 py-2 text-sm text-muted-foreground font-medium border-b flex items-center justify-between">
-            <span>{snippet.language}</span>
+            <span>typescript</span>
           </div>
           <SyntaxHighlighter
             language="typescript"

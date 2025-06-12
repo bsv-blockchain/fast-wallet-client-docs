@@ -1,5 +1,3 @@
-
-import { Code, Play, Book, Zap } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -9,8 +7,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { Button } from '@/components/ui/button'
 
 interface Topic {
   id: string;
@@ -46,6 +44,20 @@ export function AppSidebar({ topics, selectedTopic, onTopicChange }: AppSidebarP
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup className="absolute bottom-8">
+          <SidebarGroupLabel className="text-lg font-semibold px-4 py-7">
+            BRC-100 Wallet Required
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>  
+              <SidebarMenuItem>
+                <Button onClick={() => window.location.assign('https://metanet.bsvb.tech')} className="w-full font-bold bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                  Get Metanet Desktop
+                </Button>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

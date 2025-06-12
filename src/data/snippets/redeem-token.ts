@@ -2,8 +2,8 @@ import { WalletClient, Script } from '@bsv/sdk'
 
 export async function redeemToken(runner) {
 
-    // Create a WalletClient instance, auto-find a wallet substrate, and declare the origin of the requests.
-    const wallet = new WalletClient('auto', 'bsv-event-tickets.com')
+    // Create a WalletClient instance
+    const wallet = new WalletClient()
 
     // List the spendable tokens within this user's basket
     const list = await wallet.listOutputs({

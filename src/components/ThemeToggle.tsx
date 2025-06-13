@@ -9,8 +9,6 @@ export function ThemeToggle() {
   const toggleTheme = () => {
     if (theme === "light") {
       setTheme("dark")
-    } else if (theme === "dark") {
-      setTheme("system")
     } else {
       setTheme("light")
     }
@@ -26,7 +24,6 @@ export function ThemeToggle() {
 
   const getTooltipText = () => {
     if (theme === "light") return "Switch to dark mode"
-    if (theme === "dark") return "Switch to system theme"
     return "Switch to light mode"
   }
 

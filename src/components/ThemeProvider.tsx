@@ -42,6 +42,7 @@ export function ThemeProvider({
         ? "dark"
         : "light"
 
+      setTheme(systemTheme)
       root.classList.add(systemTheme)
       return
     }

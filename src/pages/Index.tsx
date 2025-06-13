@@ -1,5 +1,6 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { CodeSnippetContainer } from "@/components/CodeSnippetContainer";
@@ -8,8 +9,35 @@ import { topicsData } from "@/data/topics";
 
 const Index = () => {
   const [selectedTopic, setSelectedTopic] = useState("tokens");
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
 
+  // Find the current topic based on selected ID
   const currentTopic = topicsData.find(topic => topic.id === selectedTopic);
+  
+  // Handle scroll to specific snippet when URL contains snippet parameter
+  useEffect(() => {
+    const snippetId = searchParams.get('snippet');
+    if (snippetId) {
+      // Find which topic contains this snippet
+      const topicWithSnippet = topicsData.find(topic => 
+        topic.snippets.some(snippet => snippet.id === snippetId)
+      );
+      
+      // If found, select that topic first
+      if (topicWithSnippet && topicWithSnippet.id !== selectedTopic) {
+        setSelectedTopic(topicWithSnippet.id);
+      }
+      
+      // Small delay to ensure the DOM is updated before scrolling
+      setTimeout(() => {
+        const element = document.getElementById(snippetId);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+  }, [searchParams, location.search, selectedTopic]);
 
   return (
     <SidebarProvider>

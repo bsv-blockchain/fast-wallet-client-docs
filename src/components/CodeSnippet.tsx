@@ -1,9 +1,10 @@
 
 import { useState } from "react";
-import { Play, Copy, Check } from "lucide-react";
+import { Play, Copy, Check, Link } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useTheme } from "@/components/ThemeProvider";
@@ -25,7 +26,10 @@ export function CodeSnippet({ snippet, index }: CodeSnippetProps) {
   const [output, setOutput] = useState<string>("");
   const [isRunning, setIsRunning] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [shared, setShared] = useState(false);
   const { theme } = useTheme();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const getSyntaxTheme = () => {
     if (theme === "dark") return oneDark;
@@ -73,8 +77,29 @@ export function CodeSnippet({ snippet, index }: CodeSnippetProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const shareLink = async () => {
+    // Create shareable URL with snippet ID
+    const shareableUrl = `${window.location.origin}${location.pathname}?snippet=${snippet.id}`;
+    
+    try {
+      await navigator.clipboard.writeText(shareableUrl);
+      setShared(true);
+      toast({
+        title: "Link copied!",
+        description: "Shareable link has been copied to your clipboard.",
+      });
+      setTimeout(() => setShared(false), 2000);
+    } catch (error) {
+      toast({
+        title: "Failed to copy link",
+        description: "There was an error copying the link to your clipboard.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <Card className="w-full shadow-lg border border-border">
+    <Card id={snippet.id} className="w-full shadow-lg border border-border scroll-mt-20">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl font-semibold text-foreground">
@@ -84,8 +109,22 @@ export function CodeSnippet({ snippet, index }: CodeSnippetProps) {
             <Button
               variant="outline"
               size="sm"
+              onClick={shareLink}
+              className="transition-all duration-200"
+              title="Copy link to this snippet"
+            >
+              {shared ? (
+                <Check className="h-4 w-4" />
+              ) : (
+                <Link className="h-4 w-4" />
+              )}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={copyCode}
               className="transition-all duration-200"
+              title="Copy code"
             >
               {copied ? (
                 <Check className="h-4 w-4" />

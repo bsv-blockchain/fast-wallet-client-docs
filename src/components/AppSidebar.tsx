@@ -9,6 +9,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Button } from '@/components/ui/button'
+import { useNavigate } from 'react-router-dom'
 
 interface Topic {
   id: string;
@@ -23,6 +24,7 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ topics, selectedTopic, onTopicChange }: AppSidebarProps) {
+  const navigate = useNavigate();
   return (
     <Sidebar className="border-r border-border">
       <SidebarContent>
@@ -35,7 +37,13 @@ export function AppSidebar({ topics, selectedTopic, onTopicChange }: AppSidebarP
               {topics.map((topic) => (
                 <SidebarMenuItem key={topic.id}>
                   <SidebarMenuButton
-                    onClick={() => onTopicChange(topic.id)}
+                    onClick={() => {
+                      // Change topic
+                      onTopicChange(topic.id);
+                      navigate({
+                        search: '',
+                      }, { replace: true });
+                    }}
                     isActive={selectedTopic === topic.id}
                     className="w-full justify-start px-4 py-3"
                   >

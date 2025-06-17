@@ -8,7 +8,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useTheme } from "@/components/ThemeProvider";
-import snippets from '../data/snippets'
+import snippets from '../snippets'
 
 interface Snippet {
   id: string;
@@ -50,6 +50,14 @@ export function CodeSnippet({ snippet, index }: CodeSnippetProps) {
           logs.push(args.map(arg => {
             if (arg?.tx) {
               arg.tx = ['large number array hidden for clarity, see network tab for actual data']
+            }
+            if (arg.outputs) {
+              arg.outputs = arg.outputs.map(output => {
+                if (output?.beef) {
+                  output.beef = ['large number array hidden for clarity, see network tab for actual data']
+                }
+                return output
+              })
             }
             return typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
           }).join(' '));

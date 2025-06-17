@@ -5,7 +5,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { CodeSnippetContainer } from "@/components/CodeSnippetContainer";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { topicsData } from "@/data/topics";
+import { topicsData } from "@/snippets/_data";
 
 const Index = () => {
   const [selectedTopic, setSelectedTopic] = useState("tokens");

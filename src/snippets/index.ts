@@ -3,6 +3,9 @@ import { download } from './download'
 import { listTokens } from './list-tokens'
 import { redeemToken } from './redeem-token'
 import { upload } from './upload'
+import { addTokenToOverlay } from './add-token-to-overlay'
+import { listHelloWorldTokens } from './list-hello-world-tokens'
+import { spendTokenFromOverlay } from './spend-token-from-overlay'
 
 export default {
     createToken,
@@ -10,4 +13,7 @@ export default {
     redeemToken,
     upload,
     download,
+    addTokenToOverlay,
+    listHelloWorldTokens,
+    spendTokenFromOverlay
 }

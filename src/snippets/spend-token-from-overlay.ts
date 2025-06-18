@@ -23,25 +23,29 @@ export async function spendTokenFromOverlay(runner) {
 
     const [txid, vout] = list.outputs[0].outpoint.split('.')
     const sourceTransaction = Transaction.fromBEEF(list.BEEF, txid)
-    const placeholdingTx = new Transaction()
-    placeholdingTx.addInput({
+
+    // Construct a temporary transaction as a convenint way to sign the token we want to spend.
+    // Using sighash none & anyone can pay, we create a signature which the wallet can use along 
+    // with any inputs and outputs needed. 
+    const temp = new Transaction()
+    temp.addInput({
         sourceTransaction,
         sourceOutputIndex: Number(vout),
         unlockingScriptTemplate: token.unlock(protocolID, keyID, counterparty, sighash, anyoneCanPay, satoshis)
     })
-    placeholdingTx.addOutput({
+    temp.addOutput({
         satoshis,
         lockingScript: Script.fromASM('OP_TRUE')
     })
-    await placeholdingTx.sign()
+    await temp.sign()
 
-    // Redeem a token which represents an event ticket
+    // Create Action will use the signature we created above to spend the token.
     const response = await wallet.createAction({
       description: 'spend hello world token',
       inputBEEF: list.BEEF,
       inputs: [{
         outpoint: list.outputs[0].outpoint,
-        unlockingScript: placeholdingTx.inputs[0].unlockingScript.toHex(),
+        unlockingScript: temp.inputs[0].unlockingScript.toHex(),
         inputDescription: 'hello world token'
       }]
     })

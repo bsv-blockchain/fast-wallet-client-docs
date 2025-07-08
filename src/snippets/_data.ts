@@ -1,4 +1,4 @@
-import { ShoppingBag, FileArchive } from "lucide-react";
+import { ShoppingBag, FileArchive, MessageCircleIcon, Network } from "lucide-react";
 import createToken from './create-token.ts?raw';
 import listTokens from './list-tokens.ts?raw';
 import redeemToken from './redeem-token.ts?raw';
@@ -7,6 +7,8 @@ import download from "./download.ts?raw";
 import addTokenToOverlay from "./add-token-to-overlay.ts?raw";
 import listHelloWorldTokens from "./list-hello-world-tokens.ts?raw";
 import spendTokenFromOverlay from "./spend-token-from-overlay.ts?raw";
+import encryptDecrypt from "./encrypt-decrypt.ts?raw";
+import messageDelivery from "./message-delivery.ts?raw";
 
 export const topicsData = [
   {
@@ -56,7 +58,7 @@ export const topicsData = [
   {
     id: "overlay",
     title: "Using Overlays",
-    icon: FileArchive,
+    icon: Network,
     snippets: [
       {
         id: "addTokenToOverlay",
@@ -75,6 +77,25 @@ export const topicsData = [
         title: "Spend a token from the hello world overlay",
         explanation: "Listing hello world tokens from user's wallet, spending one of them, and broadcasting the transaction to the hello world overlay.",
         code: spendTokenFromOverlay
+      }
+    ]
+  },
+  {
+    id: "messages",
+    title: "Sending Messages",
+    icon: MessageCircleIcon,
+    snippets: [
+      {
+        id: 'encryptDecrypt',
+        title: "Encrypt and Decrypt a Message Between Peers",
+        explanation: "Making use of AES256 encryption with a shared key to encrypt messages intended for a specific counterparty.",
+        code: encryptDecrypt
+      },
+      {
+        id: 'messageDelivery',
+        title: 'Delivering Messages Securely',
+        explanation: 'To deliver messages to counterparties securely we host servers which either route messages between client via web sockets or store and forward messages to the intended recipient.',
+        code: messageDelivery
       }
     ]
   }

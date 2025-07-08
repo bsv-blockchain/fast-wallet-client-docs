@@ -177,7 +177,7 @@ export function CodeSnippet({ snippet, index }: CodeSnippetProps) {
           </Button>
 
           {output && (
-            <div className="bg-muted/50 rounded-lg p-4 border">
+            <div className="bg-muted/50 rounded-lg p-4 border overflow-hidden">
               <h4 className="text-sm font-medium text-foreground mb-2">Output:</h4>
               <pre className="text-sm text-muted-foreground whitespace-pre-wrap">
                 {output}

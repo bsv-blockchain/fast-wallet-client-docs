@@ -6,6 +6,7 @@ import { upload } from './upload'
 import { addTokenToOverlay } from './add-token-to-overlay'
 import { listHelloWorldTokens } from './list-hello-world-tokens'
 import { spendTokenFromOverlay } from './spend-token-from-overlay'
+import { encryptDecrypt } from './encrypt-decrypt'
 
 export default {
     createToken,
@@ -15,5 +16,6 @@ export default {
     download,
     addTokenToOverlay,
     listHelloWorldTokens,
-    spendTokenFromOverlay
+    spendTokenFromOverlay,
+    encryptDecrypt,
 }

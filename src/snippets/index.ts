@@ -7,6 +7,9 @@ import { addTokenToOverlay } from './add-token-to-overlay'
 import { listHelloWorldTokens } from './list-hello-world-tokens'
 import { spendTokenFromOverlay } from './spend-token-from-overlay'
 import { encryptDecrypt } from './encrypt-decrypt'
+import { messageDelivery } from './message-delivery'
+import { receiveMessage } from './receive-message'
+import { acknowledgeMessage } from './acknowledge-message'
 
 export default {
     createToken,
@@ -18,4 +21,7 @@ export default {
     listHelloWorldTokens,
     spendTokenFromOverlay,
     encryptDecrypt,
+    messageDelivery,
+    receiveMessage,
+    acknowledgeMessage,
 }

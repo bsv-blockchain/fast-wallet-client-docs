@@ -9,6 +9,8 @@ import listHelloWorldTokens from "./list-hello-world-tokens.ts?raw";
 import spendTokenFromOverlay from "./spend-token-from-overlay.ts?raw";
 import encryptDecrypt from "./encrypt-decrypt.ts?raw";
 import messageDelivery from "./message-delivery.ts?raw";
+import receiveMessage from "./receive-message.ts?raw";
+import acknowledgeMessage from "./acknowledge-message.ts?raw";
 
 export const topicsData = [
   {
@@ -96,6 +98,18 @@ export const topicsData = [
         title: 'Delivering Messages Securely',
         explanation: 'To deliver messages to counterparties securely we host servers which either route messages between client via web sockets or store and forward messages to the intended recipient.',
         code: messageDelivery
+      },
+      {
+        id: 'receiveMessage',
+        title: 'Receiving Messages Securely',
+        explanation: 'To receive messages from counterparties we listMessages for a given message box and host.',
+        code: receiveMessage
+      },
+      {
+        id: 'acknowledgeMessage',
+        title: 'Acknowledging Messages',
+        explanation: 'To acknowledge messages we list messages to get messageIds and then acknowledge them in a separate call, removing them from the message box.',
+        code: acknowledgeMessage
       }
     ]
   }

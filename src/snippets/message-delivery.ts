@@ -1,22 +1,36 @@
-import { WalletClient, Utils } from '@bsv/sdk'
+import { WalletClient, Utils, ProtoWallet } from '@bsv/sdk'
 import { MessageBoxClient } from '@bsv/message-box-client'
 
-export async function encryptDecrypt(runner) {
+export async function messageDelivery(runner) {
 
     // Connect to user's wallet
     const wallet = new WalletClient()
-
-    const ciphertext = 'lSGqYAvSqCYIn49oKYOAsyVF7DsXPdp0wvQFmRTv72tEMJ3iEGw/OQOEkupDPV2uDCxeldiI6H6Sn+UAhGtx4RurQ++Je3xPHQ=='
-
-    const { plaintext } = await wallet.decrypt({
-        ciphertext: response.ciphertext,    
-        counterparty,
-        keyID,
-        protocolID
+    const { publicKey } = await wallet.getPublicKey({
+        identityKey: true
     })
 
-    const checkMessage = Utils.toUTF8(plaintext)
+    // fake counterparty encrypts a message for you.
+    const proto = new ProtoWallet('anyone')
+    const { ciphertext } = await proto.encrypt({
+        plaintext: Utils.toArray('Something only we can know', 'utf8'),
+        counterparty: publicKey,
+        keyID: 'random string',
+        protocolID: [0, 'secrets']
+    })
 
-    runner.log({ checkMessage })
+
+    const mbc = new MessageBoxClient({
+        host: 'https://message-box-us-1.bsvb.tech',
+        walletClient: wallet
+    })
+
+    // send the encrypted message to the message box
+    const response = await mbc.sendMessage({
+        body: Utils.toBase64(ciphertext),
+        recipient: publicKey,
+        messageBox: 'secrets of utmost importance'
+    }, 'https://message-box-us-1.bsvb.tech')
+
+    runner.log(response)
 
 }

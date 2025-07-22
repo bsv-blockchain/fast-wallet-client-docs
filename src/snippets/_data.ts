@@ -1,4 +1,4 @@
-import { ShoppingBag, FileArchive, MessageCircleIcon, Network } from "lucide-react";
+import { ShoppingBag, FileArchive, MessageCircleIcon, Network, Stamp } from "lucide-react";
 import createToken from './create-token.ts?raw';
 import listTokens from './list-tokens.ts?raw';
 import redeemToken from './redeem-token.ts?raw';
@@ -11,6 +11,7 @@ import encryptDecrypt from "./encrypt-decrypt.ts?raw";
 import messageDelivery from "./message-delivery.ts?raw";
 import receiveMessage from "./receive-message.ts?raw";
 import acknowledgeMessage from "./acknowledge-message.ts?raw";
+import createCertificate from "./create-certificate.ts?raw";
 
 export const topicsData = [
   {
@@ -111,6 +112,19 @@ export const topicsData = [
         explanation: 'To acknowledge messages we list messages to get messageIds and then acknowledge them in a separate call, removing them from the message box.',
         code: acknowledgeMessage
       }
+    ]
+  },
+  {
+    id: "certificates",
+    title: "Certificates",
+    icon: Stamp,
+    snippets: [
+      {
+        id: 'createCertificate',
+        title: "Create a Certificate",
+        explanation: "Encapsulates a credential attesting to your plumbing skills.",
+        code: createCertificate
+      },
     ]
   }
 ];

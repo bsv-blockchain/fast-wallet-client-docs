@@ -114,17 +114,17 @@ export const topicsData = [
       }
     ]
   },
-  {
-    id: "certificates",
-    title: "Certificates",
-    icon: Stamp,
-    snippets: [
-      {
-        id: 'createCertificate',
-        title: "Create a Certificate",
-        explanation: "Encapsulates a credential attesting to your plumbing skills.",
-        code: createCertificate
-      },
-    ]
-  }
+  // {
+  //   id: "certificates",
+  //   title: "Certificates",
+  //   icon: Stamp,
+  //   snippets: [
+  //     {
+  //       id: 'createCertificate',
+  //       title: "Create a Certificate",
+  //       explanation: "Encapsulates a credential attesting to your plumbing skills.",
+  //       code: createCertificate
+  //     },
+  //   ]
+  // }
 ];

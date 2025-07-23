@@ -9,8 +9,11 @@ export async function spendTokenFromOverlay(runner) {
     const list = await wallet.listOutputs({
         basket: 'hello world',
         include: 'entire transactions',
-        includeCustomInstructions: true
+        includeCustomInstructions: true,
     })
+    
+    runner.log(list.outputs.length, 'tokens found')
+    if (list.outputs.length === 0) return
 
     const token = new PushDrop(wallet)
 

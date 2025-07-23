@@ -17,11 +17,14 @@ export async function acknowledgeMessage(runner) {
         host: 'https://message-box-us-1.bsvb.tech'
     })
 
+    runner.log({ list })
+    if (list.length === 0) return
+
     const response = await mbc.acknowledgeMessage({
         messageIds: list.map(item => item.messageId),
         host: 'https://message-box-us-1.bsvb.tech'
     })
 
-    runner.log(response)
+    runner.log({ response })
 
 }

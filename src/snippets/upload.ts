@@ -8,7 +8,7 @@ export async function upload(runner) {
     // Setup a client for uploading documents
     const uploader = new StorageUploader({
         wallet,
-        storageURL: 'https://nanostore.babbage.systems'
+        storageURL: 'https://uhrp-us-1.bsvb.tech'
     })
 
     const data = Utils.toArray('This can be any file buffer', 'utf8')

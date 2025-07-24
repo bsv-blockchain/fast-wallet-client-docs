@@ -1,22 +1,22 @@
-import { WalletClient, ProtoWallet } from '@bsv/sdk'
+import { WalletClient, Utils } from '@bsv/sdk'
 
 export async function createCertificate(runner) {
 
     // Connect to user's wallet
-    const wallet = new WalletClient()
+    const wallet = new WalletClient('auto', 'deggen')
+    
+    // Server key at our certifier endpoint
+    const certifier = '03c644fe2fd97673a5d86555a58587e7936390be6582ece262bc387014bcff6fe4'
+    
+    const type = Utils.toBase64(Utils.toArray('internet plumbing', 'utf8'))
 
-    const certifier = new ProtoWallet('anyone')
-    const { publicKey } = await certifier.getPublicKey({
-      identityKey: true
-    })
-
-    // Create a token which represents an event ticket
+    // Create a certificate of anything you need
     const response = await wallet.acquireCertificate({
+      type,
       acquisitionProtocol: 'issuance',
-      certifier: publicKey,
-      certifierUrl: 'https://certify.brc.dev',
-      type: 'plumbing skills',
-      fields: {
+      certifier,
+      certifierUrl: 'https://certify.bsvb.tech',
+      fields: {  
         'soldering': 'veteran',
         'pipe fitting': 'expert',
         'customer service': 'delightful',

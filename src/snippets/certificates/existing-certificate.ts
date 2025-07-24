@@ -13,13 +13,27 @@ export async function existingCertificate(runner) {
         limit: 1
     })
 
-    const certificate = response.certificates[0]
-    const fields = await MasterCertificate.decryptFields(wallet, certificate.keyring, certificate.fields, certificate.certifier)
+    const c = response.certificates[0]
+    const fields = await MasterCertificate.decryptFields(wallet, c.keyring, c.fields, c.certifier)
 
-    const partialRevelation = { moustache: certificate.keyring.moustache }
+    runner.log({ fields })
+
+    // Create a verifiable certificate
+    const fieldsToReveal = ['moustache'] // revealing this field only
+    const verifier = '02ec9b58db65002d0971c3abe2eef3403d23602d8de2af51445d84e1b64c11a646' // to this identity
+
+    const verifierKeyring = await MasterCertificate.createKeyringForVerifier(
+        wallet,
+        c.certifier,
+        verifier,
+        c.fields,
+        fieldsToReveal,
+        c.keyring,
+        c.serialNumber
+    )
+
+    const verifiableCertificate = VerifiableCertificate.fromCertificate(c, verifierKeyring)
     
-    const moustacheCredential = VerifiableCertificate.fromCertificate(certificate, partialRevelation)
-    
-    runner.log({ moustacheCredential })
+    runner.log({ verifiableCertificate })
 
 }

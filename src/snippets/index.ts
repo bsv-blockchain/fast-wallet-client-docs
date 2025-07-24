@@ -10,7 +10,8 @@ import { encryptDecrypt } from './encrypt-decrypt'
 import { messageDelivery } from './message-delivery'
 import { receiveMessage } from './receive-message'
 import { acknowledgeMessage } from './acknowledge-message'
-import { createCertificate } from './create-certificate'
+import { createCertificate } from './certificates/create-certificate'
+import { existingCertificate } from './certificates/existing-certificate'
 
 export default {
     createToken,
@@ -26,4 +27,5 @@ export default {
     receiveMessage,
     acknowledgeMessage,
     createCertificate,
+    existingCertificate,
 }

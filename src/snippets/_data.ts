@@ -11,7 +11,8 @@ import encryptDecrypt from "./encrypt-decrypt.ts?raw";
 import messageDelivery from "./message-delivery.ts?raw";
 import receiveMessage from "./receive-message.ts?raw";
 import acknowledgeMessage from "./acknowledge-message.ts?raw";
-import createCertificate from "./create-certificate.ts?raw";
+import createCertificate from "./certificates/create-certificate.ts?raw";
+import existingCertificate from "./certificates/existing-certificate.ts?raw";
 
 export const topicsData = [
   {
@@ -125,6 +126,12 @@ export const topicsData = [
         explanation: "Encapsulates a credential attesting to your plumbing skills.",
         code: createCertificate
       },
+      {
+        id: 'existingCertificate',
+        title: "List Existing Certificates",
+        explanation: "List existing certificates from your wallet.",
+        code: existingCertificate
+      }   
     ]
   }
 ];

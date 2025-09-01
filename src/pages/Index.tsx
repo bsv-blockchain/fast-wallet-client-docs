@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { CodeSnippetContainer } from "@/components/CodeSnippetContainer";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -47,12 +47,20 @@ const Index = () => {
           selectedTopic={selectedTopic}
           onTopicChange={setSelectedTopic}
         />
-        <main className="flex-1 p-6 mt-10 overflow-auto">
-          <div className="max-w-4xl mx-auto space-y-8">
-            <div className="text-center mb-12 relative">
-              <div className="absolute top-0 right-0">
-                <ThemeToggle />
-              </div>
+        <main className="flex-1 overflow-auto">
+          {/* Mobile header with buttons */}
+          <div className="md:hidden flex justify-between items-center p-4 pt-6">
+            <SidebarTrigger />
+            <ThemeToggle />
+          </div>
+          
+          {/* Desktop theme toggle */}
+          <div className="hidden md:block absolute top-6 right-6 z-10">
+            <ThemeToggle />
+          </div>
+          
+          <div className="max-w-4xl mx-auto space-y-8 p-6 pt-4 md:pt-16">
+            <div className="text-center mb-12">
               <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 WalletClient Quickstart
               </h1>

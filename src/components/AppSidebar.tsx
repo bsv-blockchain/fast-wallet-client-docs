@@ -7,6 +7,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
@@ -25,6 +26,8 @@ interface AppSidebarProps {
 
 export function AppSidebar({ topics, selectedTopic, onTopicChange }: AppSidebarProps) {
   const navigate = useNavigate();
+  const { setOpenMobile, isMobile } = useSidebar();
+  
   return (
     <Sidebar className="border-r border-border">
       <SidebarContent>
@@ -43,6 +46,10 @@ export function AppSidebar({ topics, selectedTopic, onTopicChange }: AppSidebarP
                       navigate({
                         search: '',
                       }, { replace: true });
+                      // Close mobile menu after selection
+                      if (isMobile) {
+                        setOpenMobile(false);
+                      }
                     }}
                     isActive={selectedTopic === topic.id}
                     className="w-full justify-start px-4 py-3"

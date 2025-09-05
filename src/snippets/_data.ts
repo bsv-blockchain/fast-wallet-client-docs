@@ -45,6 +45,50 @@ export const topicsData = [
       }
     ]
   },
+  {
+    id: "identity",
+    title: "Identity",
+    icon: IdCard,
+    snippets: [
+      {
+        id: 'resolveIdentityKey',
+        title: "Resolve Identity Key",
+        explanation: "Resolve an identity key for a counterparty.",
+        code: resolveIdentityKey
+      },
+    ]
+  },
+  {
+    id: "payments",
+    title: "Payments",
+    icon: CreditCard,
+    snippets: [
+      {
+        id: 'payToIdentity',
+        title: "Pay to Identity",
+        explanation: "Calculate an address associated with an identity key.",
+        code: payToIdentity
+      },
+      {
+        id: 'createPaymentTransaction',
+        title: "Create Payment Transaction",
+        explanation: "Create a payment transaction.",
+        code: createPaymentTransaction
+      },
+      {
+        id: 'internalizePayment',
+        title: "Internalize Payment",
+        explanation: "Internalize a payment.",
+        code: internalizePayment
+      },
+      {
+        id: 'refundFromBob',
+        title: "Refund from Bob",
+        explanation: "Refund a payment from Bob.",
+        code: refundFromBob
+      }
+    ]
+  },
   { 
     id: "data",
     title: "Distributed Data Storage",
@@ -137,50 +181,6 @@ export const topicsData = [
         explanation: "List existing certificates from your wallet.",
         code: existingCertificate
       }   
-    ]
-  },
-  {
-    id: "identity",
-    title: "Identity",
-    icon: IdCard,
-    snippets: [
-      {
-        id: 'resolveIdentityKey',
-        title: "Resolve Identity Key",
-        explanation: "Resolve an identity key for a counterparty.",
-        code: resolveIdentityKey
-      },
-    ]
-  },
-  {
-    id: "payments",
-    title: "Payments",
-    icon: CreditCard,
-    snippets: [
-      {
-        id: 'payToIdentity',
-        title: "Pay to Identity",
-        explanation: "Calculate an address associated with an identity key.",
-        code: payToIdentity
-      },
-      {
-        id: 'createPaymentTransaction',
-        title: "Create Payment Transaction",
-        explanation: "Create a payment transaction.",
-        code: createPaymentTransaction
-      },
-      {
-        id: 'internalizePayment',
-        title: "Internalize Payment",
-        explanation: "Internalize a payment.",
-        code: internalizePayment
-      },
-      {
-        id: 'refundFromBob',
-        title: "Refund from Bob",
-        explanation: "Refund a payment from Bob.",
-        code: refundFromBob
-      }
     ]
   }
 ];

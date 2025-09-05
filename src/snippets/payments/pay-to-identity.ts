@@ -2,7 +2,7 @@ import { WalletClient, Random, Utils, Hash, PublicKey } from '@bsv/sdk'
 import { brc29ProtocolID } from '@bsv/wallet-toolbox-client'
 
 export async function payToIdentity(runner) {
-  const bobIdentityKey = '02ec9b58db65002d0971c3abe2eef3403d23602d8de2af51445d84e1b64c11a646'
+  const bobIdentityKey = '025706528f0f6894b2ba505007267ccff1133e004452a1f6b72ac716f246216366'
 
   const wallet = new WalletClient()
 

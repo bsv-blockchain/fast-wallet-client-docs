@@ -1,63 +1,63 @@
-import { PrivateKey, WalletClient, Utils, KeyDeriver, Transaction, P2PKH } from '@bsv/sdk'
-import { brc29ProtocolID } from '@bsv/wallet-toolbox-client'
+import { PrivateKey, PublicKey, Utils, KeyDeriver, Transaction, P2PKH, WalletClient } from '@bsv/sdk'
+import { brc29ProtocolID, WalletStorageManager, WalletSigner, Services, StorageClient, Wallet } from '@bsv/wallet-toolbox-client'
 
 export async function internalizePayment(runner) {
   // Create a Bob wallet for demonstration purposes only.
   const bob = PrivateKey.fromWif('KzJZf4P8KmdHQcZ7KpRu3eqp75qn8wh2eotaomCStB9XGv5b7ENS')
   const keyDeriver = new KeyDeriver(bob)
-  
+  const storageManager = new WalletStorageManager(keyDeriver.identityKey)
+  const signer = new WalletSigner('main', keyDeriver, storageManager)
+  const services = new Services('main')
+  const w = new Wallet(signer, services)
+  const client = new StorageClient(
+    w,
+    'https://store-us-1.bsvb.tech'
+  )
+  await client.makeAvailable()
+  await storageManager.addWalletStorageProvider(client)
+
+  // Imagine this was a regular WalletClient - the w just means we're doing this for Bob not the local user.
+  const wallet = new WalletClient(w)
+
   // Using localStorage for this demo only, in real world you'd get this p2p or via message box.
   const payments = JSON.parse(localStorage.getItem('payments') || '[]')
   const payment = payments.shift()
+  if (!payment) throw new Error('You must run the Create Payment Transaction snippet first')
   const keyID = `${payment.paymentData.derivationPrefix} ${payment.paymentData.derivationSuffix}`
+
+  const { publicKey: paymentPublicKey } = await wallet.getPublicKey({
+    protocolID: brc29ProtocolID,
+    keyID,
+    counterparty: payment.paymentData.senderIdentityKey,
+    forSelf: true
+  })
   
-  // This is how we get the corresponding private key when not using the wallet-toolbox, 
-  // but in real world use this is calculated automatically by wallet-toolbox internals.
-  const privateKey = keyDeriver.derivePrivateKey(brc29ProtocolID, keyID, payment.paymentData.senderIdentityKey)
   const transaction = Transaction.fromBEEF(payment.response.tx)
   let bobsOutput = -1
-  const target = privateKey.toPublicKey().toHash('hex')
+  const target = PublicKey.fromString(paymentPublicKey).toHash('hex')
   transaction.outputs.map((output, vout) => {
+    console.log(Utils.toHex(output.lockingScript.chunks[2].data) , target)
     if (Utils.toHex(output.lockingScript.chunks[2].data) === target) {
       bobsOutput = vout
     }
     return null
   })
-  
-  const wallet = new WalletClient()
 
-  // Create a draft unsigned transaction really to define outputs                               for ourselves automatically.
-  const response = await wallet.createAction({
-    description: 'Internalize refund from Bob',
-    inputBEEF: payment.response.tx,
-    inputs: [{
-      outpoint: `${payment.response.txid}.${bobsOutput}`,
-      unlockingScriptLength: 108,
-      inputDescription: 'refund from Bob'
+  // Really all this does is store the details of the utxo we control so that we can use it.
+  // This will add funds to our default basket.
+  const response = await wallet.internalizeAction({
+    description: 'Payment from demo user',
+    tx: payment.response.tx,
+    outputs: [{
+      outputIndex: bobsOutput,
+      protocol: 'wallet payment',
+      paymentRemittance: {
+        derivationPrefix: payment.paymentData.derivationPrefix,
+        derivationSuffix: payment.paymentData.derivationSuffix,
+        senderIdentityKey: payment.paymentData.senderIdentityKey
+      }
     }]
   })
 
-  const refundTx = Transaction.fromBEEF(response.signableTransaction.tx)
-
-  // We imagine that Bob signs it
-  refundTx.inputs[0].unlockingScriptTemplate = new P2PKH().unlock(privateKey)
-  await refundTx.fee()
-  await refundTx.sign()
-
-  // apply the signature to the draft and broadcast it
-  const finalResponse = await wallet.signAction({
-    reference: response.signableTransaction.reference,
-    spends: {
-      [0]: {
-        unlockingScript: refundTx.inputs[0].unlockingScript.toHex()
-      }
-    }
-  })
-
-  runner.log(finalResponse)
-
-  if (finalResponse.txid) {
-    // remove the payment from localStorage
-    localStorage.setItem('payments', JSON.stringify(payments))
-  }
+  runner.log(response)
 }

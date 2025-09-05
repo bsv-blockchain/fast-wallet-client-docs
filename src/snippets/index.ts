@@ -16,6 +16,7 @@ import { resolveIdentityKey } from './identity/resolve-identity-key'
 import { payToIdentity } from './payments/pay-to-identity'
 import { createPaymentTransaction } from './payments/create-payment-transaction'
 import { internalizePayment } from './payments/internalize-payment'
+import { refundFromBob } from './payments/refund-from-bob'
 
 export default {
     createToken,
@@ -36,4 +37,5 @@ export default {
     payToIdentity,
     createPaymentTransaction,
     internalizePayment,
+    refundFromBob,
 }

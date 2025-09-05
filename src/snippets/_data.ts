@@ -17,6 +17,7 @@ import receiveMessage from "./messages/receive-message.ts?raw";
 import acknowledgeMessage from "./messages/acknowledge-message.ts?raw";
 import createCertificate from "./certificates/create-certificate.ts?raw";
 import existingCertificate from "./certificates/existing-certificate.ts?raw";
+import refundFromBob from "./payments/refund-from-bob.ts?raw";
 
 export const topicsData = [
   {
@@ -173,6 +174,12 @@ export const topicsData = [
         title: "Internalize Payment",
         explanation: "Internalize a payment.",
         code: internalizePayment
+      },
+      {
+        id: 'refundFromBob',
+        title: "Refund from Bob",
+        explanation: "Refund a payment from Bob.",
+        code: refundFromBob
       }
     ]
   }

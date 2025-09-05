@@ -1,18 +1,23 @@
-import { ShoppingBag, FileArchive, MessageCircleIcon, Network, Stamp } from "lucide-react";
-import createToken from './create-token.ts?raw';
-import listTokens from './list-tokens.ts?raw';
-import redeemToken from './redeem-token.ts?raw';
-import upload from './upload.ts?raw';
-import download from "./download.ts?raw";
-import addTokenToOverlay from "./add-token-to-overlay.ts?raw";
-import listHelloWorldTokens from "./list-hello-world-tokens.ts?raw";
-import spendTokenFromOverlay from "./spend-token-from-overlay.ts?raw";
-import encryptDecrypt from "./encrypt-decrypt.ts?raw";
-import messageDelivery from "./message-delivery.ts?raw";
-import receiveMessage from "./receive-message.ts?raw";
-import acknowledgeMessage from "./acknowledge-message.ts?raw";
+import { ShoppingBag, FileArchive, MessageCircleIcon, Network, Stamp, CreditCard, IdCard } from "lucide-react";
+import createToken from './basic-tokens/create-token.ts?raw';
+import listTokens from './basic-tokens/list-tokens.ts?raw';
+import redeemToken from './basic-tokens/redeem-token.ts?raw';
+import upload from './distributed-data/upload.ts?raw';
+import download from "./distributed-data/download.ts?raw";
+import addTokenToOverlay from "./overlays/add-token-to-overlay.ts?raw";
+import listHelloWorldTokens from "./overlays/list-hello-world-tokens.ts?raw";
+import spendTokenFromOverlay from "./overlays/spend-token-from-overlay.ts?raw";
+import resolveIdentityKey from "./identity/resolve-identity-key.ts?raw";
+import payToIdentity from "./payments/pay-to-identity.ts?raw";
+import createPaymentTransaction from "./payments/create-payment-transaction.ts?raw";
+import internalizePayment from "./payments/internalize-payment.ts?raw";
+import encryptDecrypt from "./messages/encrypt-decrypt.ts?raw";
+import messageDelivery from "./messages/message-delivery.ts?raw";
+import receiveMessage from "./messages/receive-message.ts?raw";
+import acknowledgeMessage from "./messages/acknowledge-message.ts?raw";
 import createCertificate from "./certificates/create-certificate.ts?raw";
 import existingCertificate from "./certificates/existing-certificate.ts?raw";
+import refundFromBob from "./payments/refund-from-bob.ts?raw";
 
 export const topicsData = [
   {
@@ -37,6 +42,50 @@ export const topicsData = [
         title: "Redeem a Token",
         explanation: "Grab the first token of this type in the user's wallet, and spend it.",
         code: redeemToken
+      }
+    ]
+  },
+  {
+    id: "identity",
+    title: "Identity",
+    icon: IdCard,
+    snippets: [
+      {
+        id: 'resolveIdentityKey',
+        title: "Resolve Identity Key",
+        explanation: "Resolve an identity key for a counterparty.",
+        code: resolveIdentityKey
+      },
+    ]
+  },
+  {
+    id: "payments",
+    title: "Payments",
+    icon: CreditCard,
+    snippets: [
+      {
+        id: 'payToIdentity',
+        title: "Pay to Identity",
+        explanation: "Calculate an address associated with an identity key.",
+        code: payToIdentity
+      },
+      {
+        id: 'createPaymentTransaction',
+        title: "Create Payment Transaction",
+        explanation: "Create a payment transaction.",
+        code: createPaymentTransaction
+      },
+      {
+        id: 'internalizePayment',
+        title: "Internalize Payment",
+        explanation: "Internalize a payment.",
+        code: internalizePayment
+      },
+      {
+        id: 'refundFromBob',
+        title: "Refund from Bob",
+        explanation: "Refund a payment from Bob.",
+        code: refundFromBob
       }
     ]
   },

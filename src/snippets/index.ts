@@ -1,17 +1,21 @@
-import { createToken } from './create-token'
-import { download } from './download'
-import { listTokens } from './list-tokens'
-import { redeemToken } from './redeem-token'
-import { upload } from './upload'
-import { addTokenToOverlay } from './add-token-to-overlay'
-import { listHelloWorldTokens } from './list-hello-world-tokens'
-import { spendTokenFromOverlay } from './spend-token-from-overlay'
-import { encryptDecrypt } from './encrypt-decrypt'
-import { messageDelivery } from './message-delivery'
-import { receiveMessage } from './receive-message'
-import { acknowledgeMessage } from './acknowledge-message'
+import { createToken } from './basic-tokens/create-token'
+import { download } from './distributed-data/download'
+import { listTokens } from './basic-tokens/list-tokens'
+import { redeemToken } from './basic-tokens/redeem-token'
+import { upload } from './distributed-data/upload'
+import { addTokenToOverlay } from './overlays/add-token-to-overlay'
+import { listHelloWorldTokens } from './overlays/list-hello-world-tokens'
+import { spendTokenFromOverlay } from './overlays/spend-token-from-overlay'
+import { encryptDecrypt } from './messages/encrypt-decrypt'
+import { messageDelivery } from './messages/message-delivery'
+import { receiveMessage } from './messages/receive-message'
+import { acknowledgeMessage } from './messages/acknowledge-message'
 import { createCertificate } from './certificates/create-certificate'
 import { existingCertificate } from './certificates/existing-certificate'
+import { resolveIdentityKey } from './identity/resolve-identity-key'
+import { payToIdentity } from './payments/pay-to-identity'
+import { createPaymentTransaction } from './payments/create-payment-transaction'
+import { internalizePayment } from './payments/internalize-payment'
 
 export default {
     createToken,
@@ -28,4 +32,8 @@ export default {
     acknowledgeMessage,
     createCertificate,
     existingCertificate,
+    resolveIdentityKey,
+    payToIdentity,
+    createPaymentTransaction,
+    internalizePayment,
 }

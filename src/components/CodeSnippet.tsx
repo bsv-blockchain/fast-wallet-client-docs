@@ -47,19 +47,31 @@ export function CodeSnippet({ snippet, index }: CodeSnippetProps) {
       const logs: string[] = [];
       const customConsole = {
         log: (...args: any[]) => {
+          const cleanObject = (obj: any): any => {
+            if (obj === null || typeof obj !== 'object') {
+              return obj;
+            }
+            
+            if (Array.isArray(obj)) {
+              return obj.map(cleanObject);
+            }
+            
+            const cleaned: any = {};
+            for (const [key, value] of Object.entries(obj)) {
+              if (key === 'tx' || key === 'beef' || key === 'BEEF') {
+                cleaned[key] = ['large number array hidden for clarity, see network tab for actual data'];
+              } else if (typeof value === 'object' && value !== null) {
+                cleaned[key] = cleanObject(value);
+              } else {
+                cleaned[key] = value;
+              }
+            }
+            return cleaned;
+          };
+
           logs.push(args.map(arg => {
-            if (arg?.tx) {
-              arg.tx = ['large number array hidden for clarity, see network tab for actual data']
-            }
-            if (arg.outputs) {
-              arg.outputs = arg.outputs.map(output => {
-                if (output?.beef) {
-                  output.beef = ['large number array hidden for clarity, see network tab for actual data']
-                }
-                return output
-              })
-            }
-            return typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            const cleanedArg = cleanObject(arg);
+            return typeof cleanedArg === 'object' ? JSON.stringify(cleanedArg, null, 2) : String(cleanedArg);
           }).join(' '));
         }
       };

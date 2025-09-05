@@ -1,11 +1,16 @@
-import { WalletClient,  PublicKey, P2PKH } from '@bsv/sdk'
+import { PrivateKey, WalletClient,  PublicKey, P2PKH, ProtoWallet, WalletInterface } from '@bsv/sdk'
 import { brc29ProtocolID } from '@bsv/wallet-toolbox-client'
 
 export async function createPaymentTransaction(runner) {
-  const wallet = new WalletClient('auto', 'deggen')
+  const wallet = new WalletClient()
 
-  const amount = 10
-  const bobIdentityKey = '02ec9b58db65002d0971c3abe2eef3403d23602d8de2af51445d84e1b64c11a646'
+  // Create a Bob wallet for demonstration purposes only.
+  const bob = PrivateKey.fromWif('KzJZf4P8KmdHQcZ7KpRu3eqp75qn8wh2eotaomCStB9XGv5b7ENS')
+  const bobWallet = new WalletClient(new ProtoWallet(bob) as WalletInterface)
+  const { publicKey: bobIdentityKey } = await bobWallet.getPublicKey({
+    identityKey: true
+  })
+
   const { publicKey: senderIdentityKey } = await wallet.getPublicKey({
     identityKey: true
   })
@@ -26,14 +31,19 @@ export async function createPaymentTransaction(runner) {
   const script = new P2PKH().lock(PublicKey.fromString(paymentPublicKey).toAddress())
 
   const response = await wallet.createAction({
-    description: 'Create Payment Transaction',
+    description: 'Pay Bob',
     outputs: [{
-      satoshis: amount,
+      satoshis: 14,
       lockingScript: script.toHex(),
-      outputDescription: `payment to Bob of ${amount} satoshis`,
+      outputDescription: `Payment to Bob of 14 satoshis`,
       customInstructions: JSON.stringify(paymentData)
     }]
   })
+
+  // store the payment for use in other snippets
+  const payments = JSON.parse(localStorage.getItem('payments') || '[]')
+  payments.push({ response, paymentData })
+  localStorage.setItem('payments', JSON.stringify(payments))
 
   return runner.log(response)
 }

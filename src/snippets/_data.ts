@@ -1,4 +1,4 @@
-import { ShoppingBag, FileArchive, MessageCircleIcon, Network, Stamp, CreditCard, IdCard, PersonStanding } from "lucide-react";
+import { ShoppingBag, FileArchive, MessageCircleIcon, Network, Stamp, CreditCard, IdCard } from "lucide-react";
 import createToken from './basic-tokens/create-token.ts?raw';
 import listTokens from './basic-tokens/list-tokens.ts?raw';
 import redeemToken from './basic-tokens/redeem-token.ts?raw';

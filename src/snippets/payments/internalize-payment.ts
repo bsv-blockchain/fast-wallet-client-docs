@@ -2,7 +2,7 @@ import { PrivateKey, PublicKey, Utils, KeyDeriver, Transaction, P2PKH, WalletCli
 import { brc29ProtocolID, WalletStorageManager, WalletSigner, Services, StorageClient, Wallet } from '@bsv/wallet-toolbox-client'
 
 export async function internalizePayment(runner) {
-  
+
   // Create a Bob wallet for demonstration purposes only.
   const bob = PrivateKey.fromWif('KzJZf4P8KmdHQcZ7KpRu3eqp75qn8wh2eotaomCStB9XGv5b7ENS')
   const keyDeriver = new KeyDeriver(bob)
@@ -36,12 +36,10 @@ export async function internalizePayment(runner) {
   const transaction = Transaction.fromBEEF(payment.response.tx)
   let bobsOutput = -1
   const target = PublicKey.fromString(paymentPublicKey).toHash('hex')
-  transaction.outputs.map((output, vout) => {
-    console.log(Utils.toHex(output.lockingScript.chunks[2].data) , target)
+  transaction.outputs.forEach((output, vout) => {
     if (Utils.toHex(output.lockingScript.chunks[2].data) === target) {
       bobsOutput = vout
     }
-    return null
   })
 
   // Really all this does is store the details of the utxo we control so that we can use it.

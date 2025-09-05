@@ -19,11 +19,10 @@ export async function refundFromBob(runner) {
   const transaction = Transaction.fromBEEF(payment.response.tx)
   let bobsOutput = -1
   const target = privateKey.toPublicKey().toHash('hex')
-  transaction.outputs.map((output, vout) => {
+  transaction.outputs.forEach((output, vout) => {
     if (Utils.toHex(output.lockingScript.chunks[2].data) === target) {
       bobsOutput = vout
     }
-    return null
   })
   
   const wallet = new WalletClient()
@@ -62,5 +61,5 @@ export async function refundFromBob(runner) {
     // remove the payment from localStorage
     localStorage.setItem('payments', JSON.stringify(payments))
   }
-  
+
 }

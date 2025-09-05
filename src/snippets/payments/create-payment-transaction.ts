@@ -11,8 +11,6 @@ export async function createPaymentTransaction(runner) {
     identityKey: true
   })
 
-  runner.log({ bobIdentityKey })
-
   const { publicKey: senderIdentityKey } = await wallet.getPublicKey({
     identityKey: true
   })

@@ -2,6 +2,7 @@ import { PrivateKey, WalletClient,  PublicKey, P2PKH, ProtoWallet, WalletInterfa
 import { brc29ProtocolID } from '@bsv/wallet-toolbox-client'
 
 export async function createPaymentTransaction(runner) {
+  
   const wallet = new WalletClient()
 
   // Create a Bob wallet for demonstration purposes only.
@@ -46,4 +47,5 @@ export async function createPaymentTransaction(runner) {
   localStorage.setItem('payments', JSON.stringify(payments))
 
   return runner.log(response)
+
 }

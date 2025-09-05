@@ -2,6 +2,7 @@ import { PrivateKey, PublicKey, Utils, KeyDeriver, Transaction, P2PKH, WalletCli
 import { brc29ProtocolID, WalletStorageManager, WalletSigner, Services, StorageClient, Wallet } from '@bsv/wallet-toolbox-client'
 
 export async function internalizePayment(runner) {
+  
   // Create a Bob wallet for demonstration purposes only.
   const bob = PrivateKey.fromWif('KzJZf4P8KmdHQcZ7KpRu3eqp75qn8wh2eotaomCStB9XGv5b7ENS')
   const keyDeriver = new KeyDeriver(bob)
@@ -60,4 +61,5 @@ export async function internalizePayment(runner) {
   })
 
   runner.log(response)
+
 }

@@ -69,7 +69,7 @@ export function AppSidebar({ topics, selectedTopic, onTopicChange }: AppSidebarP
           <SidebarGroupContent>
             <SidebarMenu>  
               <SidebarMenuItem>
-                <Button onClick={() => window.location.assign('https://metanet.bsvb.tech')} className="w-full font-bold bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                <Button onClick={() => window.location.assign('https://desktop.bsvb.tech')} className="w-full font-bold bg-gradient-to-r from-blue-600 to-purple-600 text-white">
                   Get Metanet Desktop
                 </Button>
               </SidebarMenuItem>

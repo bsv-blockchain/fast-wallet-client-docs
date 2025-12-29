@@ -64,13 +64,18 @@ export function AppSidebar({ topics, selectedTopic, onTopicChange }: AppSidebarP
         </SidebarGroup>
         <SidebarGroup className="absolute bottom-8">
           <SidebarGroupLabel className="text-lg font-semibold px-4 py-7">
-            BRC-100 Wallet Required
+            External Links
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>  
               <SidebarMenuItem>
+                <Button onClick={() => window.location.assign('/llm-training-guide.txt')} className="w-full font-bold bg-gradient-to-r from-orange-600 to-red-600 text-white">
+                  LLM Training Reference
+                </Button>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
                 <Button onClick={() => window.location.assign('https://desktop.bsvb.tech')} className="w-full font-bold bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-                  Get Metanet Desktop
+                  Get a BRC-100 Wallet
                 </Button>
               </SidebarMenuItem>
             </SidebarMenu>

@@ -521,7 +521,7 @@ const wallet = new WalletClient()
 // Initialize uploader with storage provider
 const uploader = new StorageUploader({
   wallet,
-  storageURL: 'https://uhrp.txs.systems'
+  storageURL: 'https://go-uhrp-us-1.bsvblockchain.tech'
 })
 
 // Convert data to array format

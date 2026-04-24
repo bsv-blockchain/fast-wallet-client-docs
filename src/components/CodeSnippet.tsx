@@ -46,8 +46,8 @@ export function CodeSnippet({ snippet, index }: CodeSnippetProps) {
       // Create a custom console that captures output
       const logs: string[] = [];
       const customConsole = {
-        log: (...args: any[]) => {
-          const cleanObject = (obj: any): any => {
+        log: (...args: unknown[]) => {
+          const cleanObject = (obj: unknown): unknown => {
             if (obj === null || typeof obj !== 'object') {
               return obj;
             }
@@ -56,7 +56,7 @@ export function CodeSnippet({ snippet, index }: CodeSnippetProps) {
               return obj.map(cleanObject);
             }
             
-            const cleaned: any = {};
+            const cleaned: Record<string, unknown> = {};
             for (const [key, value] of Object.entries(obj)) {
               if (key === 'tx' || key === 'beef' || key === 'BEEF') {
                 cleaned[key] = ['large number array hidden for clarity, see network tab for actual data'];

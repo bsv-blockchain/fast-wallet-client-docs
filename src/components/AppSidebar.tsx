@@ -10,12 +10,13 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from '@/components/ui/button'
+import type { LucideIcon } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 interface Topic {
   id: string;
   title: string;
-  icon: any;
+  icon: LucideIcon;
 }
 
 interface AppSidebarProps {
@@ -69,13 +70,13 @@ export function AppSidebar({ topics, selectedTopic, onTopicChange }: AppSidebarP
           <SidebarGroupContent>
             <SidebarMenu>  
               <SidebarMenuItem>
-                <Button onClick={() => window.location.assign('/llm-training-guide.txt')} className="w-full font-bold bg-gradient-to-r from-orange-600 to-red-600 text-white">
+                <Button aria-label="Open LLM training reference" onClick={() => window.location.assign('/llm-training-guide.txt')} className="w-full font-bold bg-gradient-to-r from-orange-600 to-red-600 text-white">
                   LLM Training Reference
                 </Button>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <Button onClick={() => window.location.assign('https://desktop.bsvb.tech')} className="w-full font-bold bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-                  Get a BRC-100 Wallet
+                <Button aria-label="Install BSV Desktop wallet" onClick={() => window.location.assign('https://desktop.bsvb.tech')} className="w-full font-bold bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                  Install BSV Desktop
                 </Button>
               </SidebarMenuItem>
             </SidebarMenu>

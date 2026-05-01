@@ -65,7 +65,7 @@ const Index = () => {
                 WalletClient Quickstart
               </h1>
               <p className="text-xl text-muted-foreground">
-                Interactive code snippets to learn BSV Blockchain development
+                Current BRC-100 snippets for BSV apps using @bsv/sdk v2
               </p>
             </div>
             

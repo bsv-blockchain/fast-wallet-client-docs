@@ -1,9 +1,10 @@
-import { WalletClient, PushDrop, Utils, SecurityLevels, WalletProtocol, TopicBroadcaster, Transaction } from '@bsv/sdk'
+import { PushDrop, SecurityLevels, TopicBroadcaster, Transaction, Utils, WalletProtocol } from '@bsv/sdk'
+import { createWalletClient } from '../wallet'
 
 export async function addTokenToOverlay(runner) {
 
     // Connect to user's wallet 
-    const wallet = new WalletClient()
+    const wallet = createWalletClient()
 
     const token = new PushDrop(wallet)
 

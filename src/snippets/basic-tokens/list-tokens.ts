@@ -1,9 +1,9 @@
-import { WalletClient } from '@bsv/sdk'
+import { createWalletClient } from '../wallet'
 
 export async function listTokens(runner) {
 
     // Connect to user's wallet
-    const wallet = new WalletClient()
+    const wallet = createWalletClient()
 
     // List the spendable tokens within this user's basket
     const response = await wallet.listOutputs({

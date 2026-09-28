@@ -1,9 +1,10 @@
-import { WalletClient, StorageUploader, StorageDownloader, Utils } from '@bsv/sdk'
+import { StorageUploader, Utils } from '@bsv/sdk'
+import { createWalletClient } from '../wallet'
 
 export async function upload(runner) {
 
     // Connect to user's wallet
-    const wallet = new WalletClient()
+    const wallet = createWalletClient()
 
     // Setup a client for uploading documents
     const uploader = new StorageUploader({

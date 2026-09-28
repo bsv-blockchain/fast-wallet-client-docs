@@ -1,7 +1,8 @@
-import { PrivateKey, WalletClient, WalletProtocol } from '@bsv/sdk'
+import { PrivateKey, WalletProtocol } from '@bsv/sdk'
+import { createWalletClient } from '../wallet'
 
 export async function conformanceLinkage(runner) {
-  const wallet = new WalletClient()
+  const wallet = createWalletClient()
 
   // Unrelated compressed keys, so the probe does not depend on another wallet.
   const verifier = PrivateKey.fromHex('11'.repeat(32)).toPublicKey().toDER('hex') as string

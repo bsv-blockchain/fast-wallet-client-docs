@@ -1,9 +1,10 @@
-import { WalletClient, Script } from '@bsv/sdk'
+import { Script } from '@bsv/sdk'
+import { createWalletClient } from '../wallet'
 
 export async function redeemToken(runner) {
 
     // Connect to user's wallet 
-    const wallet = new WalletClient()
+    const wallet = createWalletClient()
 
     // List the spendable tokens within this user's basket
     const list = await wallet.listOutputs({

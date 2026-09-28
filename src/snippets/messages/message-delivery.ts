@@ -1,10 +1,11 @@
-import { WalletClient, Utils, ProtoWallet } from '@bsv/sdk'
+import { ProtoWallet, Utils } from '@bsv/sdk'
+import { createWalletClient } from '../wallet'
 import { MessageBoxClient } from '@bsv/message-box-client'
 
 export async function messageDelivery(runner) {
 
     // Connect to user's wallet
-    const wallet = new WalletClient()
+    const wallet = createWalletClient()
     const { publicKey } = await wallet.getPublicKey({
         identityKey: true
     })

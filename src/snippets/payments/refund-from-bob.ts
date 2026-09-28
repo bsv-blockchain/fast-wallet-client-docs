@@ -1,4 +1,5 @@
-import { PrivateKey, WalletClient, Utils, KeyDeriver, Transaction, P2PKH } from '@bsv/sdk'
+import { KeyDeriver, P2PKH, PrivateKey, Transaction, Utils } from '@bsv/sdk'
+import { createWalletClient } from '../wallet'
 import { brc29ProtocolID } from '@bsv/wallet-toolbox-client'
 
 export async function refundFromBob(runner) {
@@ -27,7 +28,7 @@ export async function refundFromBob(runner) {
   })
   if (bobsOutput < 0) throw new Error('Could not find Bob\'s output in the payment transaction')
 
-  const wallet = new WalletClient()
+  const wallet = createWalletClient()
 
   // Create a draft unsigned transaction really to define outputs                               for ourselves automatically.
   const response = await wallet.createAction({

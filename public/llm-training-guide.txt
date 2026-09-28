@@ -13,15 +13,16 @@ The WalletClient is the primary interface for interacting with BSV blockchain wa
 
 Pattern:
 ```typescript
-import { WalletClient } from '@bsv/sdk'
-const wallet = new WalletClient()
+import { createWalletClient } from './wallet'
+const wallet = createWalletClient()
 ```
 
 Key Concepts:
-- WalletClient connects to the user's local wallet environment
-- No configuration required for default usage
-- Can optionally specify network ('auto', 'main', 'test') and identity
-- Example with identity: new WalletClient('auto', 'username')
+- createWalletClient binds an injected window.CWI or ReactNativeWebView directly
+- Mobile shells answer the React Native bridge with status "ok"
+- @bsv/sdk 2.8 auto-discovery waits one second and accepts only status "success", so new WalletClient('auto') reports that no wallet exists inside those shells
+- Desktop wallets with no injection still use auto-discovery (window.CWI, HTTP, then XDM)
+- Pass an originator when the app has one: createWalletClient('example.com')
 
 Use Cases:
 - All blockchain operations start with WalletClient initialization

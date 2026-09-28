@@ -1,9 +1,10 @@
-import { WalletClient, Utils, Random, WalletProtocol } from '@bsv/sdk'
+import { Random, Utils, WalletProtocol } from '@bsv/sdk'
+import { createWalletClient } from '../wallet'
 
 export async function encryptDecrypt(runner) {
 
     // Connect to user's wallet
-    const wallet = new WalletClient()
+    const wallet = createWalletClient()
 
     const message = 'This is a secret message.'
     const keyID = Utils.toBase64(Random(8))

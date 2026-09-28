@@ -1,8 +1,9 @@
 import { IdentityClient } from '@bsv/sdk'
+import { createWalletClient } from '../wallet'
 
 export async function resolveIdentityKey(runner) {
 
-  const identityClient = new IdentityClient()
+  const identityClient = new IdentityClient(createWalletClient())
 
   const response = await identityClient.resolveByAttributes({
     attributes: {

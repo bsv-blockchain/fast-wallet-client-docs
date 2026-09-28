@@ -1,9 +1,10 @@
-import { Hash, MasterCertificate, Utils, VerifiableCertificate, WalletClient } from '@bsv/sdk'
+import { Hash, MasterCertificate, Utils, VerifiableCertificate } from '@bsv/sdk'
+import { createWalletClient } from '../wallet'
 
 export async function existingCertificate(runner) {
 
     // Connect to user's wallet
-    const wallet = new WalletClient()
+    const wallet = createWalletClient()
 
     // Same 32-byte type used by Create a Certificate.
     const type = Utils.toBase64(Hash.sha256('internet plumbing', 'utf8'))

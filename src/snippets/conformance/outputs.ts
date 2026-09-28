@@ -1,7 +1,7 @@
-import { WalletClient } from '@bsv/sdk'
+import { createWalletClient } from '../wallet'
 
 export async function conformanceOutputs(runner) {
-  const wallet = new WalletClient()
+  const wallet = createWalletClient()
 
   const listed = await wallet.listOutputs({
     basket: 'default',

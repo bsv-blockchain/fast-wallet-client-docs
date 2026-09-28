@@ -1,7 +1,7 @@
-import { WalletClient } from '@bsv/sdk'
+import { createWalletClient } from '../wallet'
 
 export async function conformanceChain(runner) {
-  const wallet = new WalletClient()
+  const wallet = createWalletClient()
 
   const { height } = await wallet.getHeight({})
   if (!Number.isInteger(height) || height < 1) {

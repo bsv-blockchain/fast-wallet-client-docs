@@ -1,9 +1,10 @@
-import { Hash, Utils, WalletClient } from '@bsv/sdk'
+import { Hash, Utils } from '@bsv/sdk'
+import { createWalletClient } from '../wallet'
 
 export async function createCertificate(runner) {
 
     // Connect to user's wallet
-    const wallet = new WalletClient('auto', 'deggen')
+    const wallet = createWalletClient('deggen')
     
     // Server key at our certifier endpoint
     const certifier = '03c644fe2fd97673a5d86555a58587e7936390be6582ece262bc387014bcff6fe4'

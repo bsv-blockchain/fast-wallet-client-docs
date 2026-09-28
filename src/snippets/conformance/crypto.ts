@@ -1,7 +1,8 @@
-import { Utils, WalletClient, WalletProtocol } from '@bsv/sdk'
+import { Utils, WalletProtocol } from '@bsv/sdk'
+import { createWalletClient } from '../wallet'
 
 export async function conformanceCrypto(runner) {
-  const wallet = new WalletClient()
+  const wallet = createWalletClient()
   const protocolID = [1, 'conformance'] as WalletProtocol
   const keyID = 'round trip'
   const counterparty = 'self'

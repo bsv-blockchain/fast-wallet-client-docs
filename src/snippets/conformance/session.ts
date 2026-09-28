@@ -1,7 +1,7 @@
-import { WalletClient } from '@bsv/sdk'
+import { createWalletClient } from '../wallet'
 
 export async function conformanceSession(runner) {
-  const wallet = new WalletClient()
+  const wallet = createWalletClient()
 
   const authenticated = await wallet.isAuthenticated({})
   const waited = await wallet.waitForAuthentication({})

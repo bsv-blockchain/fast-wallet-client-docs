@@ -1,9 +1,10 @@
-import { PrivateKey, WalletClient,  PublicKey, P2PKH, ProtoWallet, WalletInterface } from '@bsv/sdk'
+import { P2PKH, PrivateKey, ProtoWallet, PublicKey, WalletClient, WalletInterface } from '@bsv/sdk'
 import { brc29ProtocolID } from '@bsv/wallet-toolbox-client'
+import { createWalletClient } from '../wallet'
 
 export async function createPaymentTransaction(runner) {
   
-  const wallet = new WalletClient()
+  const wallet = createWalletClient()
 
   // Create a Bob wallet for demonstration purposes only.
   const bob = PrivateKey.fromWif('KzJZf4P8KmdHQcZ7KpRu3eqp75qn8wh2eotaomCStB9XGv5b7ENS')

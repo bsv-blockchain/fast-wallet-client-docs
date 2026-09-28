@@ -1,10 +1,10 @@
-import { WalletClient, Utils, ProtoWallet } from '@bsv/sdk'
+import { createWalletClient } from '../wallet'
 import { MessageBoxClient } from '@bsv/message-box-client'
 
 export async function acknowledgeMessage(runner) {
 
     // Connect to user's wallet
-    const wallet = new WalletClient()
+    const wallet = createWalletClient()
 
     const mbc = new MessageBoxClient({
         host: 'https://message-box-us-1.bsvb.tech',

@@ -13,7 +13,7 @@ Practical BSV application snippets for the current `@bsv/sdk` v2 `WalletClient` 
 - `@bsv/sdk` v2.8 for WalletClient, transactions, crypto, storage, overlays, and certificates.
 - `@bsv/wallet-toolbox-client` v2.14 for BRC-29 and server-wallet examples.
 - `@bsv/message-box-client` v2.5 for MessageBox examples.
-- BSV Desktop or another BRC-100 wallet for user authorization and signing.
+- BSV Desktop or another BRC-100 wallet for user authorization and signing. Inside a mobile shell the examples bind `window.CWI` or `ReactNativeWebView` directly, because those wallets answer the bridge with status `ok`.
 
 ## Missing Examples
 

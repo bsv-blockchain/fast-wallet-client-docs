@@ -1,7 +1,8 @@
-import { Hash, Utils, WalletClient } from '@bsv/sdk'
+import { Hash, Utils } from '@bsv/sdk'
+import { createWalletClient } from '../wallet'
 
 export async function conformanceCertificates(runner) {
-  const wallet = new WalletClient()
+  const wallet = createWalletClient()
 
   // Same 32-byte type as the Certificates examples.
   const type = Utils.toBase64(Hash.sha256('internet plumbing', 'utf8'))

@@ -17,6 +17,14 @@ import { payToIdentity } from './payments/pay-to-identity'
 import { createPaymentTransaction } from './payments/create-payment-transaction'
 import { internalizePayment } from './payments/internalize-payment'
 import { refundFromBob } from './payments/refund-from-bob'
+import { conformanceSession } from './conformance/session'
+import { conformanceChain } from './conformance/chain'
+import { conformanceCrypto } from './conformance/crypto'
+import { conformanceLinkage } from './conformance/linkage'
+import { conformanceActions } from './conformance/actions'
+import { conformanceOutputs } from './conformance/outputs'
+import { conformanceCertificates } from './conformance/certificates'
+import { conformanceDiscovery } from './conformance/discovery'
 
 export default {
     createToken,
@@ -38,4 +46,12 @@ export default {
     createPaymentTransaction,
     internalizePayment,
     refundFromBob,
+    conformanceSession,
+    conformanceChain,
+    conformanceCrypto,
+    conformanceLinkage,
+    conformanceActions,
+    conformanceOutputs,
+    conformanceCertificates,
+    conformanceDiscovery,
 }

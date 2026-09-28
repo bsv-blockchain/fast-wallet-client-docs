@@ -41,9 +41,12 @@ export async function createPaymentTransaction(runner) {
     }]
   })
 
-  // store the payment for use in other snippets
+  // createAction returns Atomic BEEF. Store it as a plain byte list so later
+  // snippets can parse it after a trip through localStorage.
+  if (response.tx == null) throw new Error('Wallet did not return the payment transaction')
+  const storedResponse = { ...response, tx: Array.from(response.tx) }
   const payments = JSON.parse(localStorage.getItem('payments') || '[]')
-  payments.push({ response, paymentData })
+  payments.push({ response: storedResponse, paymentData })
   localStorage.setItem('payments', JSON.stringify(payments))
 
   return runner.log(response)

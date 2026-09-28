@@ -373,7 +373,7 @@ const { publicKey: paymentPublicKey } = await wallet.getPublicKey({
 })
 
 // Find the output belonging to recipient
-const transaction = Transaction.fromBEEF(paymentTx)
+const transaction = Transaction.fromAtomicBEEF(paymentTx)
 const target = PublicKey.fromString(paymentPublicKey).toHash('hex')
 let recipientOutput = -1
 
@@ -440,7 +440,7 @@ const paymentPrivateKey = keyDeriver.derivePrivateKey(
 )
 
 // Find the output in the payment transaction
-const transaction = Transaction.fromBEEF(paymentTx)
+const transaction = Transaction.fromAtomicBEEF(paymentTx)
 const target = paymentPrivateKey.toPublicKey().toHash('hex')
 let outputIndex = -1
 
@@ -455,7 +455,7 @@ const wallet = new WalletClient()
 // Create draft transaction
 const response = await wallet.createAction({
   description: 'Bob sending his money back',
-  inputBEEF: paymentTx,
+  inputBEEF: transaction.toBEEF(),
   inputs: [{
     outpoint: `${txid}.${outputIndex}`,
     unlockingScriptLength: 108, // Standard P2PKH unlocking script length
@@ -464,7 +464,7 @@ const response = await wallet.createAction({
 })
 
 // Sign externally (demonstrates manual signing)
-const refundTx = Transaction.fromBEEF(response.signableTransaction.tx)
+const refundTx = Transaction.fromAtomicBEEF(response.signableTransaction.tx)
 refundTx.inputs[0].unlockingScriptTemplate = new P2PKH().unlock(paymentPrivateKey)
 await refundTx.fee()
 await refundTx.sign()
@@ -493,7 +493,8 @@ Two-Phase Transaction Signing:
 3. signAction() applies signatures and broadcasts
 
 Manual Signing Process:
-- Transaction.fromBEEF() deserializes transaction
+- Transaction.fromAtomicBEEF() deserializes a createAction or signAction tx
+- Transaction.fromBEEF() deserializes ordinary BEEF, including listOutputs results
 - unlockingScriptTemplate: defines how to sign
 - fee(): calculates and adjusts transaction fees
 - sign(): generates signatures for all inputs
@@ -647,7 +648,7 @@ const response = await wallet.createAction({
 })
 
 // Broadcast to overlay network
-const tx = Transaction.fromBEEF(response.tx)
+const tx = Transaction.fromAtomicBEEF(response.tx)
 const overlay = new TopicBroadcaster(['tm_helloworld'])
 const overlayResponse = await tx.broadcast(overlay)
 ```
@@ -780,7 +781,7 @@ const response = await wallet.createAction({
 })
 
 // Broadcast spend to overlay
-const tx = Transaction.fromBEEF(response.tx)
+const tx = Transaction.fromAtomicBEEF(response.tx)
 const overlay = new TopicBroadcaster(['tm_helloworld'])
 const overlayResponse = await tx.broadcast(overlay)
 ```
@@ -1082,7 +1083,7 @@ Request digital certificates attesting to specific attributes or credentials.
 
 Pattern:
 ```typescript
-import { WalletClient, Utils } from '@bsv/sdk'
+import { Hash, Utils, WalletClient } from '@bsv/sdk'
 
 const wallet = new WalletClient('auto', 'deggen')
 
@@ -1090,7 +1091,7 @@ const wallet = new WalletClient('auto', 'deggen')
 const certifier = '03c644fe2fd97673a5d86555a58587e7936390be6582ece262bc387014bcff6fe4'
 
 // Certificate type
-const type = Utils.toBase64(Utils.toArray('internet plumbing', 'utf8'))
+const type = Utils.toBase64(Hash.sha256('internet plumbing', 'utf8'))
 
 // Request certificate
 const response = await wallet.acquireCertificate({
@@ -1113,7 +1114,7 @@ Key Concepts:
 - Certifier: trusted authority issuing certificates
 - acquisitionProtocol: 'issuance' for new certificates
 - fields: key-value pairs of attested attributes
-- type: category/classification of certificate
+- type: base64 SHA-256 of the certificate name, exactly 32 bytes
 
 Certificate Architecture:
 - Certifier signs certificate fields
@@ -1146,11 +1147,11 @@ Retrieve certificates from wallet and decrypt field data.
 
 Pattern:
 ```typescript
-import { WalletClient, Utils, MasterCertificate, VerifiableCertificate } from '@bsv/sdk'
+import { Hash, MasterCertificate, Utils, VerifiableCertificate, WalletClient } from '@bsv/sdk'
 
 const wallet = new WalletClient()
 
-const type = Utils.toBase64(Utils.toArray('internet plumbing', 'utf8'))
+const type = Utils.toBase64(Hash.sha256('internet plumbing', 'utf8'))
 
 // List certificates
 const response = await wallet.listCertificates({
@@ -1179,7 +1180,7 @@ Key Concepts:
 
 Query Parameters:
 - certifiers: array of trusted certifier public keys
-- types: array of certificate type identifiers
+- types: array of 32-byte base64 certificate type identifiers
 - limit: maximum certificates to return
 - Returns certificates matching criteria
 
@@ -1833,7 +1834,7 @@ const draft = await wallet.createAction({
 Phase 2 - Apply Signatures:
 ```typescript
 // External signing happens here
-const tx = Transaction.fromBEEF(draft.signableTransaction.tx)
+const tx = Transaction.fromAtomicBEEF(draft.signableTransaction.tx)
 tx.inputs[0].unlockingScriptTemplate = template
 await tx.sign()
 
@@ -1892,7 +1893,8 @@ Overlay Broadcasting:
 ```typescript
 import { TopicBroadcaster } from '@bsv/sdk'
 
-const tx = Transaction.fromBEEF(beef)
+// createAction and signAction return Atomic BEEF. listOutputs BEEF stays ordinary BEEF.
+const tx = Transaction.fromAtomicBEEF(beef)
 const overlay = new TopicBroadcaster(['tm_helloworld'])
 await tx.broadcast(overlay)
 ```

@@ -1,4 +1,4 @@
-import { ShoppingBag, FileArchive, MessageCircleIcon, Network, Stamp, CreditCard, IdCard } from "lucide-react";
+import { ShoppingBag, FileArchive, MessageCircleIcon, Network, Stamp, CreditCard, IdCard, ListChecks } from "lucide-react";
 import createToken from './basic-tokens/create-token.ts?raw';
 import listTokens from './basic-tokens/list-tokens.ts?raw';
 import redeemToken from './basic-tokens/redeem-token.ts?raw';
@@ -18,6 +18,14 @@ import acknowledgeMessage from "./messages/acknowledge-message.ts?raw";
 import createCertificate from "./certificates/create-certificate.ts?raw";
 import existingCertificate from "./certificates/existing-certificate.ts?raw";
 import refundFromBob from "./payments/refund-from-bob.ts?raw";
+import conformanceSession from "./conformance/session.ts?raw";
+import conformanceChain from "./conformance/chain.ts?raw";
+import conformanceCrypto from "./conformance/crypto.ts?raw";
+import conformanceLinkage from "./conformance/linkage.ts?raw";
+import conformanceActions from "./conformance/actions.ts?raw";
+import conformanceOutputs from "./conformance/outputs.ts?raw";
+import conformanceCertificates from "./conformance/certificates.ts?raw";
+import conformanceDiscovery from "./conformance/discovery.ts?raw";
 
 export const topicsData = [
   {
@@ -172,15 +180,71 @@ export const topicsData = [
       {
         id: 'createCertificate',
         title: "Create a Certificate",
-        explanation: "Encapsulates a credential attesting to your plumbing skills.",
+        explanation: "Asks the certifier for an internet-plumbing credential. The type is the SHA-256 of that name, because a certificate type must be exactly 32 bytes.",
         code: createCertificate
       },
       {
         id: 'existingCertificate',
         title: "List Existing Certificates",
-        explanation: "List existing certificates from your wallet.",
+        explanation: "Lists certificates of that same 32-byte type. When one is present, decrypts its fields and builds a verifiable certificate.",
         code: existingCertificate
       }   
+    ]
+  },
+  {
+    id: "conformance",
+    title: "Conformance",
+    icon: ListChecks,
+    description: "BRC-100 wallet checks for the methods in the WalletInterface conformance suite. A run succeeds when @bsv/sdk accepts the wallet's response. Run all keeps going after a failure so each example reports on its own. Create, sign, and internalize actions stay on the other pages. Relinquish is left out because it deletes wallet state. The no-send action selects an input and then aborts, so a working wallet does not broadcast it.",
+    snippets: [
+      {
+        id: "conformanceSession",
+        title: "Session",
+        explanation: "Checks isAuthenticated, waitForAuthentication, getVersion, and getNetwork. The version must look like vendor-major.minor.patch.",
+        code: conformanceSession
+      },
+      {
+        id: "conformanceChain",
+        title: "Chain tip",
+        explanation: "Checks getHeight and getHeaderForHeight. The header must be 80 bytes.",
+        code: conformanceChain
+      },
+      {
+        id: "conformanceCrypto",
+        title: "Keys and cryptography",
+        explanation: "Checks getPublicKey, then an encrypt/decrypt round trip, createHmac/verifyHmac, and createSignature/verifySignature.",
+        code: conformanceCrypto
+      },
+      {
+        id: "conformanceLinkage",
+        title: "Key linkage",
+        explanation: "Checks revealCounterpartyKeyLinkage and revealSpecificKeyLinkage against unrelated verifier keys.",
+        code: conformanceLinkage
+      },
+      {
+        id: "conformanceActions",
+        title: "Actions",
+        explanation: "Checks listActions, then createAction with noSend, then abortAction. The wallet needs a spendable output to build the probe. Aborting releases it without a broadcast.",
+        code: conformanceActions
+      },
+      {
+        id: "conformanceOutputs",
+        title: "Outputs",
+        explanation: "Checks listOutputs on the default basket. An empty basket is a valid response.",
+        code: conformanceOutputs
+      },
+      {
+        id: "conformanceCertificates",
+        title: "Certificate queries",
+        explanation: "Checks listCertificates with a 32-byte type. When a certificate exists, proveCertificate reveals one field. An empty list is a valid response.",
+        code: conformanceCertificates
+      },
+      {
+        id: "conformanceDiscovery",
+        title: "Discovery",
+        explanation: "Checks discoverByIdentityKey for this wallet and discoverByAttributes for a username. An empty certificate list is a valid response.",
+        code: conformanceDiscovery
+      }
     ]
   }
 ];

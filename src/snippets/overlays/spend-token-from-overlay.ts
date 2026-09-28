@@ -54,7 +54,8 @@ export async function spendTokenFromOverlay(runner) {
     })
 
     // Capture the resulting transaction
-    const tx = Transaction.fromBEEF(response.tx)
+    if (response.tx == null) throw new Error('Wallet did not return the transaction')
+    const tx = Transaction.fromAtomicBEEF(response.tx)
 
     runner.log(response)
 

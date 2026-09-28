@@ -18,6 +18,10 @@ export async function receiveMessage(runner) {
     })
 
     runner.log({ list })
+    if (list.length === 0) {
+        runner.log('No messages yet. Run Delivering Messages Securely first.')
+        return
+    }
 
     // use fake counterparty for demo
     const proto = new ProtoWallet('anyone')

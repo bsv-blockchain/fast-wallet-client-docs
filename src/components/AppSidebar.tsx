@@ -1,6 +1,7 @@
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -11,7 +12,6 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from '@/components/ui/button'
 import type { LucideIcon } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 
 interface Topic {
   id: string;
@@ -26,14 +26,13 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ topics, selectedTopic, onTopicChange }: AppSidebarProps) {
-  const navigate = useNavigate();
   const { setOpenMobile, isMobile } = useSidebar();
   
   return (
     <Sidebar className="border-r border-border">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-lg font-semibold px-4 py-7">
+          <SidebarGroupLabel className="px-4 py-4 text-base font-semibold">
             Goals
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -42,47 +41,44 @@ export function AppSidebar({ topics, selectedTopic, onTopicChange }: AppSidebarP
                 <SidebarMenuItem key={topic.id}>
                   <SidebarMenuButton
                     onClick={() => {
-                      // Change topic
                       onTopicChange(topic.id);
-                      navigate({
-                        search: '',
-                      }, { replace: true });
-                      // Close mobile menu after selection
                       if (isMobile) {
                         setOpenMobile(false);
                       }
                     }}
                     isActive={selectedTopic === topic.id}
-                    className="w-full justify-start px-4 py-3"
+                    className="h-auto w-full items-start justify-start whitespace-normal px-3 py-2.5 [&>span:last-child]:overflow-visible [&>span:last-child]:whitespace-normal [&>span:last-child]:text-clip"
                   >
-                    <topic.icon className="mr-3 h-4 w-4" />
-                    <span className="text-lg">{topic.title}</span>
+                    <topic.icon className="mr-3 mt-0.5 h-4 w-4 shrink-0" />
+                    <span className="text-left text-sm leading-snug">{topic.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <SidebarGroup className="absolute bottom-8">
-          <SidebarGroupLabel className="text-lg font-semibold px-4 py-7">
+      </SidebarContent>
+      <SidebarFooter>
+        <SidebarGroup>
+          <SidebarGroupLabel className="px-2 py-2 text-sm font-semibold">
             External Links
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>  
+            <SidebarMenu>
               <SidebarMenuItem>
-                <Button aria-label="Open LLM training reference" onClick={() => window.location.assign('/llm-training-guide.txt')} className="w-full font-bold bg-gradient-to-r from-orange-600 to-red-600 text-white">
+                <Button aria-label="Open LLM training reference" onClick={() => window.location.assign('/llm-training-guide.txt')} className="h-auto w-full whitespace-normal bg-gradient-to-r from-orange-600 to-red-600 py-2 text-sm font-bold text-white">
                   LLM Training Reference
                 </Button>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <Button aria-label="Install BSV Desktop wallet" onClick={() => window.location.assign('https://desktop.bsvb.tech')} className="w-full font-bold bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                <Button aria-label="Install BSV Desktop wallet" onClick={() => window.location.assign('https://desktop.bsvb.tech')} className="h-auto w-full whitespace-normal bg-gradient-to-r from-blue-600 to-purple-600 py-2 text-sm font-bold text-white">
                   Install BSV Desktop
                 </Button>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-      </SidebarContent>
+      </SidebarFooter>
     </Sidebar>
   );
 }

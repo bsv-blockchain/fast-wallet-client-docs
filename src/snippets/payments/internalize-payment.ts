@@ -33,7 +33,8 @@ export async function internalizePayment(runner) {
     forSelf: true
   })
   
-  const transaction = Transaction.fromBEEF(payment.response.tx)
+  // createAction tx bytes are Atomic BEEF (BRC-95).
+  const transaction = Transaction.fromAtomicBEEF(payment.response.tx)
   let bobsOutput = -1
   const target = PublicKey.fromString(paymentPublicKey).toHash('hex')
   transaction.outputs.forEach((output, vout) => {
@@ -41,6 +42,7 @@ export async function internalizePayment(runner) {
       bobsOutput = vout
     }
   })
+  if (bobsOutput < 0) throw new Error('Could not find Bob\'s output in the payment transaction')
 
   // Really all this does is store the details of the utxo we control so that we can use it.
   // This will add funds to our default basket.

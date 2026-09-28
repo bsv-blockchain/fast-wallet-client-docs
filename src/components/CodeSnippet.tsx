@@ -1,10 +1,11 @@
 
-import { useState } from "react";
-import { Play, Copy, Check, Link } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Play, Copy, Check, Link, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useTheme } from "@/components/ThemeProvider";
@@ -20,21 +21,39 @@ interface Snippet {
 interface CodeSnippetProps {
   snippet: Snippet;
   index: number;
+  showCode: boolean;
+  autoRun: boolean;
+  runAllActive: boolean;
+  onAutoRunComplete: (id: string) => void;
 }
 
-export function CodeSnippet({ snippet, index }: CodeSnippetProps) {
+export function CodeSnippet({
+  snippet,
+  index,
+  showCode,
+  autoRun,
+  runAllActive,
+  onAutoRunComplete,
+}: CodeSnippetProps) {
   const [output, setOutput] = useState<string>("");
   const [isRunning, setIsRunning] = useState(false);
   const [copied, setCopied] = useState(false);
   const [shared, setShared] = useState(false);
+  const [codeOpen, setCodeOpen] = useState(showCode);
   const { theme } = useTheme();
-  const navigate = useNavigate();
   const location = useLocation();
+  const runCodeRef = useRef<() => Promise<void>>(async () => {});
+  const onAutoRunCompleteRef = useRef(onAutoRunComplete);
+  const autoRunStarted = useRef(false);
+  onAutoRunCompleteRef.current = onAutoRunComplete;
+
+  useEffect(() => {
+    setCodeOpen(showCode);
+  }, [showCode]);
 
   const getSyntaxTheme = () => {
     if (theme === "dark") return oneDark;
     if (theme === "light") return oneLight;
-    // For system theme, check if dark mode is preferred
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? oneDark : oneLight;
   };
 
@@ -43,7 +62,6 @@ export function CodeSnippet({ snippet, index }: CodeSnippetProps) {
     setOutput("");
 
     try {
-      // Create a custom console that captures output
       const logs: string[] = [];
       const customConsole = {
         log: (...args: unknown[]) => {
@@ -51,11 +69,11 @@ export function CodeSnippet({ snippet, index }: CodeSnippetProps) {
             if (obj === null || typeof obj !== 'object') {
               return obj;
             }
-            
+
             if (Array.isArray(obj)) {
               return obj.map(cleanObject);
             }
-            
+
             const cleaned: Record<string, unknown> = {};
             for (const [key, value] of Object.entries(obj)) {
               if (key === 'tx' || key === 'beef' || key === 'BEEF') {
@@ -76,7 +94,6 @@ export function CodeSnippet({ snippet, index }: CodeSnippetProps) {
         }
       };
 
-      // Run the code snippet, send the logs to the output
       await snippets[snippet.id](customConsole);
 
       setOutput(logs.length > 0 ? logs.join('\n') : "Code executed successfully (no output)");
@@ -86,6 +103,20 @@ export function CodeSnippet({ snippet, index }: CodeSnippetProps) {
       setIsRunning(false);
     }
   };
+  runCodeRef.current = runCode;
+
+  useEffect(() => {
+    if (!autoRun) {
+      autoRunStarted.current = false;
+      return;
+    }
+    if (autoRunStarted.current) return;
+    autoRunStarted.current = true;
+    document.getElementById(snippet.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    void runCodeRef.current().finally(() => {
+      onAutoRunCompleteRef.current(snippet.id);
+    });
+  }, [autoRun, snippet.id]);
 
   const copyCode = async () => {
     await navigator.clipboard.writeText(snippet.code);
@@ -98,9 +129,8 @@ export function CodeSnippet({ snippet, index }: CodeSnippetProps) {
   };
 
   const shareLink = async () => {
-    // Create shareable URL with snippet ID
     const shareableUrl = `${window.location.origin}${location.pathname}?snippet=${snippet.id}`;
-    
+
     try {
       await navigator.clipboard.writeText(shareableUrl);
       setShared(true);
@@ -109,7 +139,7 @@ export function CodeSnippet({ snippet, index }: CodeSnippetProps) {
         description: "Shareable link has been copied to your clipboard.",
       });
       setTimeout(() => setShared(false), 2000);
-    } catch (error) {
+    } catch {
       toast({
         title: "Failed to copy link",
         description: "There was an error copying the link to your clipboard.",
@@ -118,14 +148,16 @@ export function CodeSnippet({ snippet, index }: CodeSnippetProps) {
     }
   };
 
+  const failed = output.startsWith("Error:");
+
   return (
-    <Card id={snippet.id} className="w-full shadow-lg border border-border scroll-mt-20">
+    <Card id={snippet.id} className="w-full scroll-mt-32 border border-border shadow-lg">
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-xl font-semibold text-foreground">
+        <div className="flex items-start justify-between gap-3">
+          <CardTitle className="text-lg font-semibold text-foreground sm:text-xl">
             {index + 1}. {snippet.title}
           </CardTitle>
-          <div className="flex gap-2">
+          <div className="flex shrink-0 gap-2">
             <Button
               variant="outline"
               size="sm"
@@ -156,47 +188,64 @@ export function CodeSnippet({ snippet, index }: CodeSnippetProps) {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-muted-foreground leading-relaxed">
+        <p className="leading-relaxed text-muted-foreground">
           {snippet.explanation}
         </p>
-        
-        <div className="rounded-lg overflow-hidden border">
-          <div className="bg-muted/80 px-4 py-2 text-sm text-muted-foreground font-medium border-b flex items-center justify-between">
-            <span>typescript</span>
-          </div>
-          <SyntaxHighlighter
-            language="typescript"
-            style={getSyntaxTheme()}
-            customStyle={{
-              margin: 0,
-              padding: '1rem',
-              fontSize: '0.875rem',
-              lineHeight: '1.5',
-            }}
-            showLineNumbers={false}
-          >
-            {snippet.code}
-          </SyntaxHighlighter>
-        </div>
-        <div className="space-y-3">
+
+        <div className="flex flex-wrap gap-2">
           <Button
             onClick={runCode}
-            disabled={isRunning}
-            className="bg-green-600 hover:bg-green-700 text-white transition-all duration-200"
+            disabled={isRunning || (runAllActive && !autoRun)}
+            className="bg-green-600 text-white transition-all duration-200 hover:bg-green-700"
           >
             <Play className="mr-2 h-4 w-4" />
-            {isRunning ? "Running..." : "Run Code"}
+            {isRunning ? "Running..." : "Run"}
           </Button>
-
-          {output && (
-            <div className="bg-muted/50 rounded-lg p-4 border overflow-hidden">
-              <h4 className="text-sm font-medium text-foreground mb-2">Output:</h4>
-              <pre className="text-sm text-muted-foreground whitespace-pre-wrap">
-                {output}
-              </pre>
-            </div>
-          )}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setCodeOpen(open => !open)}
+            aria-expanded={codeOpen}
+          >
+            {codeOpen ? <ChevronDown className="mr-2 h-4 w-4" /> : <ChevronRight className="mr-2 h-4 w-4" />}
+            {codeOpen ? "Hide code" : "Show code"}
+          </Button>
         </div>
+
+        {codeOpen && (
+          <div className="overflow-hidden rounded-lg border">
+            <div className="flex items-center justify-between border-b bg-muted/80 px-4 py-2 text-sm font-medium text-muted-foreground">
+              <span>typescript</span>
+            </div>
+            <SyntaxHighlighter
+              language="typescript"
+              style={getSyntaxTheme()}
+              customStyle={{
+                margin: 0,
+                padding: '1rem',
+                fontSize: '0.875rem',
+                lineHeight: '1.5',
+              }}
+              showLineNumbers={false}
+            >
+              {snippet.code}
+            </SyntaxHighlighter>
+          </div>
+        )}
+
+        {output && (
+          <div className="overflow-hidden rounded-lg border bg-muted/50 p-4">
+            <div className="mb-2 flex items-center gap-2">
+              <h4 className="text-sm font-medium text-foreground">Output</h4>
+              <Badge variant={failed ? "destructive" : "secondary"}>
+                {failed ? "Failed" : "Valid response"}
+              </Badge>
+            </div>
+            <pre className="whitespace-pre-wrap break-words text-sm text-muted-foreground">
+              {output}
+            </pre>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

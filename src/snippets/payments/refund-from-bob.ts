@@ -16,7 +16,8 @@ export async function refundFromBob(runner) {
   // This is how we get the corresponding private key when not using the wallet-toolbox, 
   // but in real world use this is calculated automatically by wallet-toolbox internals.
   const privateKey = keyDeriver.derivePrivateKey(brc29ProtocolID, keyID, payment.paymentData.senderIdentityKey)
-  const transaction = Transaction.fromBEEF(payment.response.tx)
+  // The stored payment is Atomic BEEF. inputBEEF still expects ordinary BEEF.
+  const transaction = Transaction.fromAtomicBEEF(payment.response.tx)
   let bobsOutput = -1
   const target = privateKey.toPublicKey().toHash('hex')
   transaction.outputs.forEach((output, vout) => {
@@ -24,13 +25,14 @@ export async function refundFromBob(runner) {
       bobsOutput = vout
     }
   })
-  
+  if (bobsOutput < 0) throw new Error('Could not find Bob\'s output in the payment transaction')
+
   const wallet = new WalletClient()
 
   // Create a draft unsigned transaction really to define outputs                               for ourselves automatically.
   const response = await wallet.createAction({
     description: 'Bob sending his money back',
-    inputBEEF: payment.response.tx,
+    inputBEEF: transaction.toBEEF(),
     inputs: [{
       outpoint: `${payment.response.txid}.${bobsOutput}`,
       unlockingScriptLength: 108,
@@ -38,7 +40,10 @@ export async function refundFromBob(runner) {
     }]
   })
 
-  const refundTx = Transaction.fromBEEF(response.signableTransaction.tx)
+  if (response.signableTransaction?.tx == null) {
+    throw new Error('Wallet did not return a signable transaction')
+  }
+  const refundTx = Transaction.fromAtomicBEEF(response.signableTransaction.tx)
 
   // We imagine that Bob signs it
   refundTx.inputs[0].unlockingScriptTemplate = new P2PKH().unlock(privateKey)

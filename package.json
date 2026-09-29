@@ -15,8 +15,8 @@
   },
   "dependencies": {
     "@bsv/message-box-client": "^2.5.4",
-    "@bsv/sdk": "^2.8.10",
-    "@bsv/wallet-toolbox-client": "^2.14.3",
+    "@bsv/sdk": "^2.8.11",
+    "@bsv/wallet-toolbox-client": "^2.14.4",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",

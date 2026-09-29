@@ -2,7 +2,7 @@
 
 ![image](https://github.com/user-attachments/assets/81ec0c48-ae42-4a98-8369-73d9bb34fd4b)
 
-Practical BSV application snippets for the current `@bsv/sdk` v2 `WalletClient` and BRC-100 wallet interface. The examples focus on browser and application code that works with BSV Desktop, BSV Browser, or another compatible BRC-100 wallet. The Conformance page runs the rest of the WalletInterface against whatever wallet the browser is using. Code samples stay collapsed until you show them.
+Practical BSV application snippets for the current `@bsv/sdk` v2 `WalletClient` and BRC-100 wallet interface. The examples focus on browser and application code that works with BSV Desktop, BSV Browser, or another compatible BRC-100 wallet. The Conformance page runs all 28 WalletInterface methods, one after another, against whatever wallet the browser is using. Code samples stay collapsed until you show them.
 
 ## Live Site
 

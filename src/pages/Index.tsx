@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -18,9 +18,14 @@ function readShowCode() {
   }
 }
 
+type RunResult = { id: string; title: string; ok: boolean };
+
 const Index = () => {
   const [showCode, setShowCode] = useState(readShowCode);
   const [runQueue, setRunQueue] = useState<string[]>([]);
+  const [report, setReport] = useState<RunResult[]>([]);
+  const runId = useRef(0);
+  const runTitles = useRef<Record<string, string>>({});
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -48,17 +53,29 @@ const Index = () => {
   }, [snippetId, currentTopic.id]);
 
   const changeTopic = (topicId: string) => {
+    runId.current += 1;
     setRunQueue([]);
+    setReport([]);
     navigate({ search: `?topic=${topicId}` }, { replace: true });
   };
 
   const runAll = () => {
     if (!currentTopic || runQueue.length > 0) return;
+    runId.current += 1;
+    runTitles.current = Object.fromEntries(
+      currentTopic.snippets.map(snippet => [snippet.id, snippet.title])
+    );
+    setReport([]);
     setRunQueue(currentTopic.snippets.map(snippet => snippet.id));
   };
 
-  const handleAutoRunComplete = (id: string) => {
+  const handleAutoRunComplete = (id: string, ok: boolean, token: number) => {
+    if (token !== runId.current) return;
     setRunQueue(queue => (queue[0] === id ? queue.slice(1) : queue));
+    setReport(results => {
+      if (results.some(result => result.id === id)) return results;
+      return [...results, { id, title: runTitles.current[id] ?? id, ok }];
+    });
   };
 
   const runningAll = runQueue.length > 0;
@@ -119,7 +136,11 @@ const Index = () => {
                 onClick={runAll}
                 disabled={!currentTopic || runningAll}
               >
-                {runningAll ? `Running ${runProgress} of ${currentTopic?.snippets.length}` : "Run all"}
+                {runningAll
+                  ? `Running ${currentTopic?.snippets.find(snippet => snippet.id === runQueue[0])?.title ?? ""} (${runProgress} of ${currentTopic?.snippets.length})`
+                  : currentTopic?.id === "conformance"
+                    ? "Run conformance"
+                    : "Run all"}
               </Button>
             </div>
           </header>
@@ -146,11 +167,26 @@ const Index = () => {
                         {currentTopic.description}
                       </p>
                     )}
+                    {report.length > 0 && !runningAll && (
+                      <div className="rounded-md border px-3 py-2 text-sm">
+                        <p className="font-medium text-foreground">
+                          {report.filter(result => !result.ok).length === 0
+                            ? `${report.length} passed.`
+                            : `${report.filter(result => result.ok).length} passed, ${report.filter(result => !result.ok).length} failed.`}
+                        </p>
+                        {report.some(result => !result.ok) && (
+                          <p className="mt-1 text-muted-foreground">
+                            Failed: {report.filter(result => !result.ok).map(result => result.title).join(", ")}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <CodeSnippetContainer
                     snippets={currentTopic.snippets}
                     showCode={showCode}
                     autoRunId={runQueue[0] ?? null}
+                    runToken={runId.current}
                     runAllActive={runningAll}
                     onAutoRunComplete={handleAutoRunComplete}
                   />

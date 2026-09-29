@@ -18,14 +18,34 @@ import acknowledgeMessage from "./messages/acknowledge-message.ts?raw";
 import createCertificate from "./certificates/create-certificate.ts?raw";
 import existingCertificate from "./certificates/existing-certificate.ts?raw";
 import refundFromBob from "./payments/refund-from-bob.ts?raw";
-import conformanceSession from "./conformance/session.ts?raw";
-import conformanceChain from "./conformance/chain.ts?raw";
-import conformanceCrypto from "./conformance/crypto.ts?raw";
-import conformanceLinkage from "./conformance/linkage.ts?raw";
-import conformanceActions from "./conformance/actions.ts?raw";
-import conformanceOutputs from "./conformance/outputs.ts?raw";
-import conformanceCertificates from "./conformance/certificates.ts?raw";
-import conformanceDiscovery from "./conformance/discovery.ts?raw";
+import conformanceIsAuthenticated from "./conformance/is-authenticated.ts?raw";
+import conformanceWaitForAuthentication from "./conformance/wait-for-authentication.ts?raw";
+import conformanceGetVersion from "./conformance/get-version.ts?raw";
+import conformanceGetNetwork from "./conformance/get-network.ts?raw";
+import conformanceGetHeight from "./conformance/get-height.ts?raw";
+import conformanceGetHeaderForHeight from "./conformance/get-header-for-height.ts?raw";
+import conformanceGetPublicKey from "./conformance/get-public-key.ts?raw";
+import conformanceRevealCounterpartyKeyLinkage from "./conformance/reveal-counterparty-key-linkage.ts?raw";
+import conformanceRevealSpecificKeyLinkage from "./conformance/reveal-specific-key-linkage.ts?raw";
+import conformanceEncrypt from "./conformance/encrypt.ts?raw";
+import conformanceDecrypt from "./conformance/decrypt.ts?raw";
+import conformanceCreateHmac from "./conformance/create-hmac.ts?raw";
+import conformanceVerifyHmac from "./conformance/verify-hmac.ts?raw";
+import conformanceCreateSignature from "./conformance/create-signature.ts?raw";
+import conformanceVerifySignature from "./conformance/verify-signature.ts?raw";
+import conformanceListActions from "./conformance/list-actions.ts?raw";
+import conformanceListOutputs from "./conformance/list-outputs.ts?raw";
+import conformanceCreateAction from "./conformance/create-action.ts?raw";
+import conformanceSignAction from "./conformance/sign-action.ts?raw";
+import conformanceAbortAction from "./conformance/abort-action.ts?raw";
+import conformanceInternalizeAction from "./conformance/internalize-action.ts?raw";
+import conformanceRelinquishOutput from "./conformance/relinquish-output.ts?raw";
+import conformanceListCertificates from "./conformance/list-certificates.ts?raw";
+import conformanceAcquireCertificate from "./conformance/acquire-certificate.ts?raw";
+import conformanceProveCertificate from "./conformance/prove-certificate.ts?raw";
+import conformanceRelinquishCertificate from "./conformance/relinquish-certificate.ts?raw";
+import conformanceDiscoverByIdentityKey from "./conformance/discover-by-identity-key.ts?raw";
+import conformanceDiscoverByAttributes from "./conformance/discover-by-attributes.ts?raw";
 
 export const topicsData = [
   {
@@ -195,55 +215,175 @@ export const topicsData = [
     id: "conformance",
     title: "Conformance",
     icon: ListChecks,
-    description: "BRC-100 wallet checks for the methods in the WalletInterface conformance suite. A run succeeds when @bsv/sdk accepts the wallet's response. Run all keeps going after a failure so each example reports on its own. Create, sign, and internalize actions stay on the other pages. Relinquish is left out because it deletes wallet state. The no-send action selects an input and then aborts, so a working wallet does not broadcast it.",
+    description: "All 28 BRC-100 WalletInterface methods. Run conformance calls them one at a time and continues after a failure. A card passes when @bsv/sdk accepts the wallet's response. createAction, signAction, and abortAction use noSend and then abort, so they do not broadcast. internalizeAction broadcasts a 1-satoshi payment back to this wallet. relinquishOutput broadcasts 1 satoshi into the conformance basket and then stops tracking it. acquireCertificate requests a conformance-probe certificate, and relinquishCertificate removes only that certificate.",
     snippets: [
       {
-        id: "conformanceSession",
-        title: "Session",
-        explanation: "Checks isAuthenticated, waitForAuthentication, getVersion, and getNetwork. The version must look like vendor-major.minor.patch.",
-        code: conformanceSession
+        id: "conformanceIsAuthenticated",
+        title: "isAuthenticated",
+        explanation: "Checks that the wallet reports an authenticated session.",
+        code: conformanceIsAuthenticated
       },
       {
-        id: "conformanceChain",
-        title: "Chain tip",
-        explanation: "Checks getHeight and getHeaderForHeight. The header must be 80 bytes.",
-        code: conformanceChain
+        id: "conformanceWaitForAuthentication",
+        title: "waitForAuthentication",
+        explanation: "Waits until the wallet reports an authenticated session.",
+        code: conformanceWaitForAuthentication
       },
       {
-        id: "conformanceCrypto",
-        title: "Keys and cryptography",
-        explanation: "Checks getPublicKey, then an encrypt/decrypt round trip, createHmac/verifyHmac, and createSignature/verifySignature.",
-        code: conformanceCrypto
+        id: "conformanceGetVersion",
+        title: "getVersion",
+        explanation: "Checks that the version looks like vendor-major.minor.patch and is 7 to 30 bytes.",
+        code: conformanceGetVersion
       },
       {
-        id: "conformanceLinkage",
-        title: "Key linkage",
-        explanation: "Checks revealCounterpartyKeyLinkage and revealSpecificKeyLinkage against unrelated verifier keys.",
-        code: conformanceLinkage
+        id: "conformanceGetNetwork",
+        title: "getNetwork",
+        explanation: "Checks that the wallet reports mainnet or testnet.",
+        code: conformanceGetNetwork
       },
       {
-        id: "conformanceActions",
-        title: "Actions",
-        explanation: "Checks listActions, then createAction with noSend, then abortAction. The wallet needs a spendable output to build the probe. Aborting releases it without a broadcast.",
-        code: conformanceActions
+        id: "conformanceGetHeight",
+        title: "getHeight",
+        explanation: "Checks that the chain height is a positive integer.",
+        code: conformanceGetHeight
       },
       {
-        id: "conformanceOutputs",
-        title: "Outputs",
-        explanation: "Checks listOutputs on the default basket. An empty basket is a valid response.",
-        code: conformanceOutputs
+        id: "conformanceGetHeaderForHeight",
+        title: "getHeaderForHeight",
+        explanation: "Requests the header at the wallet's current height. The header must be 80 bytes.",
+        code: conformanceGetHeaderForHeight
       },
       {
-        id: "conformanceCertificates",
-        title: "Certificate queries",
-        explanation: "Checks listCertificates with a 32-byte type. When a certificate exists, proveCertificate reveals one field. An empty list is a valid response.",
-        code: conformanceCertificates
+        id: "conformanceGetPublicKey",
+        title: "getPublicKey",
+        explanation: "Checks that the identity key is a compressed public key.",
+        code: conformanceGetPublicKey
       },
       {
-        id: "conformanceDiscovery",
-        title: "Discovery",
-        explanation: "Checks discoverByIdentityKey for this wallet and discoverByAttributes for a username. An empty certificate list is a valid response.",
-        code: conformanceDiscovery
+        id: "conformanceRevealCounterpartyKeyLinkage",
+        title: "revealCounterpartyKeyLinkage",
+        explanation: "Reveals linkage for an unrelated counterparty and verifier.",
+        code: conformanceRevealCounterpartyKeyLinkage
+      },
+      {
+        id: "conformanceRevealSpecificKeyLinkage",
+        title: "revealSpecificKeyLinkage",
+        explanation: "Reveals linkage for this wallet's own conformance key to an unrelated verifier.",
+        code: conformanceRevealSpecificKeyLinkage
+      },
+      {
+        id: "conformanceEncrypt",
+        title: "encrypt",
+        explanation: "Encrypts a short message to this wallet and checks that ciphertext comes back.",
+        code: conformanceEncrypt
+      },
+      {
+        id: "conformanceDecrypt",
+        title: "decrypt",
+        explanation: "Encrypts a short message and checks that decrypt returns the same plaintext.",
+        code: conformanceDecrypt
+      },
+      {
+        id: "conformanceCreateHmac",
+        title: "createHmac",
+        explanation: "Creates an HMAC over a short message. The result must be 32 bytes.",
+        code: conformanceCreateHmac
+      },
+      {
+        id: "conformanceVerifyHmac",
+        title: "verifyHmac",
+        explanation: "Creates an HMAC and checks that verifyHmac accepts it.",
+        code: conformanceVerifyHmac
+      },
+      {
+        id: "conformanceCreateSignature",
+        title: "createSignature",
+        explanation: "Signs a short message and checks that a signature comes back.",
+        code: conformanceCreateSignature
+      },
+      {
+        id: "conformanceVerifySignature",
+        title: "verifySignature",
+        explanation: "Signs a short message and checks that verifySignature accepts it.",
+        code: conformanceVerifySignature
+      },
+      {
+        id: "conformanceListActions",
+        title: "listActions",
+        explanation: "Lists actions labeled conformance. An empty list is a valid response.",
+        code: conformanceListActions
+      },
+      {
+        id: "conformanceListOutputs",
+        title: "listOutputs",
+        explanation: "Lists the default basket. An empty basket is a valid response.",
+        code: conformanceListOutputs
+      },
+      {
+        id: "conformanceCreateAction",
+        title: "createAction",
+        explanation: "Creates a 1-satoshi noSend output, checks that a transaction or reference comes back, then aborts it. The wallet needs a spendable output. Nothing is broadcast.",
+        code: conformanceCreateAction
+      },
+      {
+        id: "conformanceSignAction",
+        title: "signAction",
+        explanation: "Creates a signable noSend action, signs it without spending inputs, then aborts it. Nothing is broadcast.",
+        code: conformanceSignAction
+      },
+      {
+        id: "conformanceAbortAction",
+        title: "abortAction",
+        explanation: "Creates a noSend action and checks that abortAction releases it. Nothing is broadcast.",
+        code: conformanceAbortAction
+      },
+      {
+        id: "conformanceInternalizeAction",
+        title: "internalizeAction",
+        explanation: "Broadcasts a 1-satoshi payment back to this wallet, then internalizes that output. The network fee is spent. The satoshi returns to the balance when internalization succeeds.",
+        code: conformanceInternalizeAction
+      },
+      {
+        id: "conformanceRelinquishOutput",
+        title: "relinquishOutput",
+        explanation: "Broadcasts 1 satoshi into the conformance basket, then stops tracking that output. The satoshi is no longer spendable by the wallet.",
+        code: conformanceRelinquishOutput
+      },
+      {
+        id: "conformanceListCertificates",
+        title: "listCertificates",
+        explanation: "Lists conformance-probe certificates. An empty list is a valid response.",
+        code: conformanceListCertificates
+      },
+      {
+        id: "conformanceAcquireCertificate",
+        title: "acquireCertificate",
+        explanation: "Asks the certifier for a conformance-probe certificate. The type is the SHA-256 of that name, because a certificate type must be exactly 32 bytes.",
+        code: conformanceAcquireCertificate
+      },
+      {
+        id: "conformanceProveCertificate",
+        title: "proveCertificate",
+        explanation: "Reveals one field of a conformance-probe certificate to an unrelated verifier. Run acquireCertificate first when this card is started on its own.",
+        code: conformanceProveCertificate
+      },
+      {
+        id: "conformanceRelinquishCertificate",
+        title: "relinquishCertificate",
+        explanation: "Removes one conformance-probe certificate. Other certificates stay in the wallet. When none exists yet, this card acquires one and then removes it.",
+        code: conformanceRelinquishCertificate
+      },
+      {
+        id: "conformanceDiscoverByIdentityKey",
+        title: "discoverByIdentityKey",
+        explanation: "Discovers certificates for this wallet's identity key. An empty list is a valid response.",
+        code: conformanceDiscoverByIdentityKey
+      },
+      {
+        id: "conformanceDiscoverByAttributes",
+        title: "discoverByAttributes",
+        explanation: "Discovers certificates with the username deggen. An empty list is a valid response.",
+        code: conformanceDiscoverByAttributes
       }
     ]
   }

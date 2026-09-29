@@ -11,6 +11,18 @@ import { oneDark, oneLight } from 'react-syntax-highlighter/dist/esm/styles/pris
 import { useTheme } from "@/components/ThemeProvider";
 import snippets from '../snippets'
 
+const snippetRuns = new Map<string, Promise<boolean>>()
+
+function runSnippetOnce(id: string, run: () => Promise<boolean>): Promise<boolean> {
+  const existing = snippetRuns.get(id)
+  if (existing) return existing
+  const promise = run().finally(() => {
+    if (snippetRuns.get(id) === promise) snippetRuns.delete(id)
+  })
+  snippetRuns.set(id, promise)
+  return promise
+}
+
 interface Snippet {
   id: string;
   title: string;
@@ -23,8 +35,9 @@ interface CodeSnippetProps {
   index: number;
   showCode: boolean;
   autoRun: boolean;
+  runToken: number;
   runAllActive: boolean;
-  onAutoRunComplete: (id: string) => void;
+  onAutoRunComplete: (id: string, ok: boolean, token: number) => void;
 }
 
 export function CodeSnippet({
@@ -32,6 +45,7 @@ export function CodeSnippet({
   index,
   showCode,
   autoRun,
+  runToken,
   runAllActive,
   onAutoRunComplete,
 }: CodeSnippetProps) {
@@ -42,7 +56,7 @@ export function CodeSnippet({
   const [codeOpen, setCodeOpen] = useState(showCode);
   const { theme } = useTheme();
   const location = useLocation();
-  const runCodeRef = useRef<() => Promise<void>>(async () => {});
+  const runCodeRef = useRef<() => Promise<boolean>>(async () => false);
   const onAutoRunCompleteRef = useRef(onAutoRunComplete);
   const autoRunStarted = useRef(false);
   onAutoRunCompleteRef.current = onAutoRunComplete;
@@ -57,7 +71,7 @@ export function CodeSnippet({
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? oneDark : oneLight;
   };
 
-  const runCode = async () => {
+  const runCode = async (): Promise<boolean> => {
     setIsRunning(true);
     setOutput("");
 
@@ -97,8 +111,10 @@ export function CodeSnippet({
       await snippets[snippet.id](customConsole);
 
       setOutput(logs.length > 0 ? logs.join('\n') : "Code executed successfully (no output)");
+      return true;
     } catch (error) {
       setOutput(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      return false;
     } finally {
       setIsRunning(false);
     }
@@ -112,11 +128,15 @@ export function CodeSnippet({
     }
     if (autoRunStarted.current) return;
     autoRunStarted.current = true;
+    let active = true;
     document.getElementById(snippet.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    void runCodeRef.current().finally(() => {
-      onAutoRunCompleteRef.current(snippet.id);
+    void runSnippetOnce(`${runToken}:${snippet.id}`, () => runCodeRef.current()).then(ok => {
+      if (active) onAutoRunCompleteRef.current(snippet.id, ok, runToken);
     });
-  }, [autoRun, snippet.id]);
+    return () => {
+      active = false;
+    };
+  }, [autoRun, runToken, snippet.id]);
 
   const copyCode = async () => {
     await navigator.clipboard.writeText(snippet.code);

@@ -17,14 +17,34 @@ import { payToIdentity } from './payments/pay-to-identity'
 import { createPaymentTransaction } from './payments/create-payment-transaction'
 import { internalizePayment } from './payments/internalize-payment'
 import { refundFromBob } from './payments/refund-from-bob'
-import { conformanceSession } from './conformance/session'
-import { conformanceChain } from './conformance/chain'
-import { conformanceCrypto } from './conformance/crypto'
-import { conformanceLinkage } from './conformance/linkage'
-import { conformanceActions } from './conformance/actions'
-import { conformanceOutputs } from './conformance/outputs'
-import { conformanceCertificates } from './conformance/certificates'
-import { conformanceDiscovery } from './conformance/discovery'
+import { conformanceIsAuthenticated } from './conformance/is-authenticated'
+import { conformanceWaitForAuthentication } from './conformance/wait-for-authentication'
+import { conformanceGetVersion } from './conformance/get-version'
+import { conformanceGetNetwork } from './conformance/get-network'
+import { conformanceGetHeight } from './conformance/get-height'
+import { conformanceGetHeaderForHeight } from './conformance/get-header-for-height'
+import { conformanceGetPublicKey } from './conformance/get-public-key'
+import { conformanceRevealCounterpartyKeyLinkage } from './conformance/reveal-counterparty-key-linkage'
+import { conformanceRevealSpecificKeyLinkage } from './conformance/reveal-specific-key-linkage'
+import { conformanceEncrypt } from './conformance/encrypt'
+import { conformanceDecrypt } from './conformance/decrypt'
+import { conformanceCreateHmac } from './conformance/create-hmac'
+import { conformanceVerifyHmac } from './conformance/verify-hmac'
+import { conformanceCreateSignature } from './conformance/create-signature'
+import { conformanceVerifySignature } from './conformance/verify-signature'
+import { conformanceListActions } from './conformance/list-actions'
+import { conformanceListOutputs } from './conformance/list-outputs'
+import { conformanceCreateAction } from './conformance/create-action'
+import { conformanceSignAction } from './conformance/sign-action'
+import { conformanceAbortAction } from './conformance/abort-action'
+import { conformanceInternalizeAction } from './conformance/internalize-action'
+import { conformanceRelinquishOutput } from './conformance/relinquish-output'
+import { conformanceListCertificates } from './conformance/list-certificates'
+import { conformanceAcquireCertificate } from './conformance/acquire-certificate'
+import { conformanceProveCertificate } from './conformance/prove-certificate'
+import { conformanceRelinquishCertificate } from './conformance/relinquish-certificate'
+import { conformanceDiscoverByIdentityKey } from './conformance/discover-by-identity-key'
+import { conformanceDiscoverByAttributes } from './conformance/discover-by-attributes'
 
 export default {
     createToken,
@@ -46,12 +66,32 @@ export default {
     createPaymentTransaction,
     internalizePayment,
     refundFromBob,
-    conformanceSession,
-    conformanceChain,
-    conformanceCrypto,
-    conformanceLinkage,
-    conformanceActions,
-    conformanceOutputs,
-    conformanceCertificates,
-    conformanceDiscovery,
+    conformanceIsAuthenticated,
+    conformanceWaitForAuthentication,
+    conformanceGetVersion,
+    conformanceGetNetwork,
+    conformanceGetHeight,
+    conformanceGetHeaderForHeight,
+    conformanceGetPublicKey,
+    conformanceRevealCounterpartyKeyLinkage,
+    conformanceRevealSpecificKeyLinkage,
+    conformanceEncrypt,
+    conformanceDecrypt,
+    conformanceCreateHmac,
+    conformanceVerifyHmac,
+    conformanceCreateSignature,
+    conformanceVerifySignature,
+    conformanceListActions,
+    conformanceListOutputs,
+    conformanceCreateAction,
+    conformanceSignAction,
+    conformanceAbortAction,
+    conformanceInternalizeAction,
+    conformanceRelinquishOutput,
+    conformanceListCertificates,
+    conformanceAcquireCertificate,
+    conformanceProveCertificate,
+    conformanceRelinquishCertificate,
+    conformanceDiscoverByIdentityKey,
+    conformanceDiscoverByAttributes,
 }

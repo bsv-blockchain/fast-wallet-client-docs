@@ -10,9 +10,8 @@ export async function makeDirectCertificate(wallet: WalletInterface, keyringReve
   const privilege = { privileged, ...(privileged ? { privilegedReason: 'Test privileged certificate branches' } : {}) }
   const subject = (await wallet.getPublicKey({ identityKey: true, ...privilege })).publicKey
   const issuer = new ProtoWallet(PrivateKey.fromRandom())
-  const master = await MasterCertificate.issueCertificateForSubject(issuer, subject, { visible: 'branch fixture', hidden: 'withheld fixture' }, type)
-  // This is a local test certificate, with the SDK's placeholder revocation
-  // outpoint. It is not a real-world identity or proof of revocation status.
+  // WalletClient requires txid.vout. The signature covers the outpoint, so the placeholder is fixed before signing.
+  const master = await MasterCertificate.issueCertificateForSubject(issuer, subject, { visible: 'branch fixture', hidden: 'withheld fixture' }, type, async () => `${'0'.repeat(64)}.0`)
   let keyring = master.masterKeyring
   let revealer = master.certifier
   if (keyringRevealer === 'subject') {

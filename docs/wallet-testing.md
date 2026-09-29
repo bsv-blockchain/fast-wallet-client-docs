@@ -67,7 +67,7 @@ No funded card starts automatically or through Run all. Each has its own Run but
 
 The persistent-spending guide broadcasts two 1-satoshi actions plus fees, conditioned on both fitting the unused 100-satoshi budget. Its ephemeral-spending counterpart constructs and aborts noSend actions. Review amounts/fees in the wallet. A delayed `sending` result is evidence of acceptance, not confirmation that mining or network propagation succeeded.
 
-Direct certificate fixtures use an ephemeral local issuer and the SDK's placeholder revocation outpoint. They are synthetic test records, not identity evidence or proof of revocation status. External issuance uses the existing conformance certifier endpoint and unique synthetic certificate types. Workflows remove only the exact fixture they acquired. Guided certificate fixtures remain until the tester clicks Remove test certificate; finish or reset the scenario before removing them.
+Direct certificate fixtures use an ephemeral local issuer and a placeholder revocation outpoint of 64 zero bytes at output 0 (`txid.0`). They are synthetic test records, not identity evidence or proof of revocation status. External issuance uses the existing conformance certifier endpoint and unique synthetic certificate types. Workflows remove only the exact fixture they acquired. Guided certificate fixtures remain until the tester clicks Remove test certificate; finish or reset the scenario before removing them.
 
 ## Regression checks and reporting
 

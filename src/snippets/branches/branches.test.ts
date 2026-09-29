@@ -1,4 +1,4 @@
-import { Certificate, MasterCertificate, PrivateKey, ProtoWallet, Script, Transaction, WalletClient, type CreateActionArgs, type CreateActionResult, type SignActionArgs, type WalletCertificate, type WalletInterface } from '@bsv/sdk'
+import { Certificate, MasterCertificate, PrivateKey, ProtoWallet, Script, Transaction, Validation, WalletClient, type CreateActionArgs, type CreateActionResult, type SignActionArgs, type WalletCertificate, type WalletInterface } from '@bsv/sdk'
 import { describe, expect, it, vi } from 'vitest'
 import { branchBroadcastActions, branchExplicitInputs, branchNoSendActions, branchSendWithBatches } from './actions'
 import { branchCryptoMatrix, branchLinkageMatrix } from './crypto'
@@ -230,6 +230,8 @@ describe('direct certificate fixtures and selective disclosure', () => {
     const wallet = cryptoWallet(true)
     const { master, args } = await makeDirectCertificate(wallet, revealer, undefined, privileged)
     expect(await master.verify()).toBe(true)
+    expect(args.revocationOutpoint).toMatch(/^([0-9A-Fa-f]{64})\.(0|[1-9]\d*)$/)
+    expect(Validation.validateAcquireDirectCertificateArgs(args).revocationOutpoint).toBe(args.revocationOutpoint)
     expect(master.subject).toBe(new PrivateKey(privileged ? 43 : 42).toPublicKey().toString())
     expect(await MasterCertificate.decryptFields(wallet, args.keyringForSubject, args.fields, args.keyringRevealer, privileged, args.privilegedReason)).toEqual({ visible: 'branch fixture', hidden: 'withheld fixture' })
   })

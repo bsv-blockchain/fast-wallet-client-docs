@@ -3,7 +3,7 @@ import { conformanceWallet } from './support'
 export async function conformanceListOutputs(runner) {
   const wallet = conformanceWallet()
   const listed = await wallet.listOutputs({
-    basket: 'default',
+    basket: 'random',
     limit: 5,
     include: 'locking scripts'
   })

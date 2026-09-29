@@ -316,7 +316,7 @@ export const topicsData = [
       {
         id: "conformanceListOutputs",
         title: "listOutputs",
-        explanation: "Lists the default basket. An empty basket is a valid response.",
+        explanation: "Lists the random basket. An empty basket is a valid response.",
         code: conformanceListOutputs
       },
       {

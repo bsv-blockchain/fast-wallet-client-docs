@@ -12,7 +12,7 @@ type ReactNativeHost = Window & {
 export type WalletBridgeDecision =
   | { type: 'ignore' }
   | { type: 'result'; result: unknown }
-  | { type: 'error'; message: string }
+  | { type: 'error'; message: string; code?: string | number }
 
 const MOBILE_WALLET_TIMEOUT_MS = 60_000
 
@@ -54,7 +54,8 @@ export function decideWalletBridgeMessage(raw: unknown, id: string): WalletBridg
   if (message.status === 'error') {
     return {
       type: 'error',
-      message: typeof message.description === 'string' ? message.description : 'Wallet request failed'
+      message: typeof message.description === 'string' ? message.description : 'Wallet request failed',
+      ...(typeof message.code === 'string' || typeof message.code === 'number' ? { code: message.code } : {})
     }
   }
   if (message.status != null && message.status !== 'ok' && message.status !== 'success') {
@@ -83,7 +84,7 @@ function reactNativeWallet(win: ReactNativeHost): WalletInterface {
         const decision = decideWalletBridgeMessage(event.data, id)
         if (decision.type === 'ignore') return
         if (decision.type === 'error') {
-          finish(() => reject(new Error(decision.message)))
+          finish(() => reject(Object.assign(new Error(decision.message), { code: decision.code })))
           return
         }
         finish(() => resolve(decision.result))

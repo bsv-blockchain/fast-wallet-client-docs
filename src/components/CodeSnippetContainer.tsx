@@ -1,3 +1,4 @@
+import type { SnippetResult } from '@/lib/snippet-runner';
 
 import { CodeSnippet } from "./CodeSnippet";
 
@@ -15,7 +16,10 @@ interface CodeSnippetContainerProps {
   autoRunId: string | null;
   runToken: number;
   runAllActive: boolean;
-  onAutoRunComplete: (id: string, ok: boolean, token: number) => void;
+  onRunComplete: (id: string, result: SnippetResult, token: number) => void;
+  anySnippetRunning: boolean;
+  onRunningChange: (id: string | null) => void;
+  shouldStop?: () => boolean;
 }
 
 export function CodeSnippetContainer({
@@ -25,7 +29,10 @@ export function CodeSnippetContainer({
   autoRunId,
   runToken,
   runAllActive,
-  onAutoRunComplete,
+  onRunComplete,
+  anySnippetRunning,
+  onRunningChange,
+  shouldStop,
 }: CodeSnippetContainerProps) {
   return (
     <div className="space-y-8">
@@ -38,7 +45,10 @@ export function CodeSnippetContainer({
             autoRun={autoRunId === snippet.id}
             runToken={runToken}
             runAllActive={runAllActive}
-            onAutoRunComplete={onAutoRunComplete}
+            onRunComplete={onRunComplete}
+            anySnippetRunning={anySnippetRunning}
+            onRunningChange={onRunningChange}
+            shouldStop={shouldStop}
           />
         </div>
       ))}

@@ -10,6 +10,7 @@ interface Snippet {
 
 interface CodeSnippetContainerProps {
   snippets: Snippet[];
+  ordinals: Record<string, number>;
   showCode: boolean;
   autoRunId: string | null;
   runToken: number;
@@ -19,6 +20,7 @@ interface CodeSnippetContainerProps {
 
 export function CodeSnippetContainer({
   snippets,
+  ordinals,
   showCode,
   autoRunId,
   runToken,
@@ -31,7 +33,7 @@ export function CodeSnippetContainer({
         <div key={snippet.id}>
           <CodeSnippet
             snippet={snippet}
-            index={index}
+            index={ordinals[snippet.id] ?? index}
             showCode={showCode}
             autoRun={autoRunId === snippet.id}
             runToken={runToken}

@@ -20,12 +20,24 @@ function readShowCode() {
 
 type RunResult = { id: string; title: string; ok: boolean };
 
+function orderWithFailuresFirst<T extends { id: string }>(snippets: T[], failedIds: Set<string>): T[] {
+  const order = new Map(snippets.map((snippet, index) => [snippet.id, index]));
+  return [...snippets].sort((left, right) => {
+    const leftGroup = failedIds.has(left.id) ? 0 : 1;
+    const rightGroup = failedIds.has(right.id) ? 0 : 1;
+    if (leftGroup !== rightGroup) return leftGroup - rightGroup;
+    return (order.get(left.id) ?? 0) - (order.get(right.id) ?? 0);
+  });
+}
+
 const Index = () => {
   const [showCode, setShowCode] = useState(readShowCode);
   const [runQueue, setRunQueue] = useState<string[]>([]);
   const [report, setReport] = useState<RunResult[]>([]);
   const runId = useRef(0);
   const runTitles = useRef<Record<string, string>>({});
+  const scoreRef = useRef<HTMLElement>(null);
+  const sawRunning = useRef(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -82,6 +94,26 @@ const Index = () => {
   const runProgress = currentTopic
     ? currentTopic.snippets.length - runQueue.length + (runningAll ? 1 : 0)
     : 0;
+  const passedCount = report.filter(result => result.ok).length;
+  const failedCount = report.length - passedCount;
+  const showScore = report.length > 0 && !runningAll;
+  const failedIds = new Set(report.filter(result => !result.ok).map(result => result.id));
+  const visibleSnippets = currentTopic && showScore
+    ? orderWithFailuresFirst(currentTopic.snippets, failedIds)
+    : currentTopic?.snippets ?? [];
+  const ordinals = Object.fromEntries(
+    (currentTopic?.snippets ?? []).map((snippet, index) => [snippet.id, index])
+  );
+
+  useEffect(() => {
+    if (runningAll) {
+      sawRunning.current = true;
+      return;
+    }
+    if (!sawRunning.current || report.length === 0) return;
+    sawRunning.current = false;
+    scoreRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [runningAll, report.length]);
 
   return (
     <SidebarProvider>
@@ -167,23 +199,69 @@ const Index = () => {
                         {currentTopic.description}
                       </p>
                     )}
-                    {report.length > 0 && !runningAll && (
-                      <div className="rounded-md border px-3 py-2 text-sm">
-                        <p className="font-medium text-foreground">
-                          {report.filter(result => !result.ok).length === 0
-                            ? `${report.length} passed.`
-                            : `${report.filter(result => result.ok).length} passed, ${report.filter(result => !result.ok).length} failed.`}
-                        </p>
-                        {report.some(result => !result.ok) && (
-                          <p className="mt-1 text-muted-foreground">
-                            Failed: {report.filter(result => !result.ok).map(result => result.title).join(", ")}
-                          </p>
+                    {showScore && (
+                      <section
+                        id="run-score"
+                        ref={scoreRef}
+                        aria-label="Results"
+                        className="scroll-mt-40 rounded-lg border border-border bg-card p-4 text-left shadow-lg"
+                      >
+                        <div className="flex flex-wrap items-end justify-between gap-3">
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">Score</p>
+                            <p className="text-3xl font-semibold tabular-nums tracking-tight text-foreground">
+                              {passedCount}
+                              <span className="text-xl font-medium text-muted-foreground"> / {report.length}</span>
+                            </p>
+                          </div>
+                          <div className="flex flex-wrap gap-2 text-sm">
+                            <span className="rounded-md bg-green-600 px-2 py-1 font-medium text-white">
+                              {passedCount} passed
+                            </span>
+                            {failedCount > 0 && (
+                              <span className="rounded-md bg-destructive px-2 py-1 font-medium text-destructive-foreground">
+                                {failedCount} failed
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div
+                          className="mt-3 flex h-2 overflow-hidden rounded-full bg-muted"
+                          role="img"
+                          aria-label={`${passedCount} of ${report.length} passed`}
+                        >
+                          <div className="bg-green-600" style={{ width: `${(passedCount / report.length) * 100}%` }} />
+                          <div className="bg-destructive" style={{ width: `${(failedCount / report.length) * 100}%` }} />
+                        </div>
+                        {failedCount === 0 ? (
+                          <p className="mt-3 text-sm text-muted-foreground">Every method returned a valid response.</p>
+                        ) : (
+                          <div className="mt-3 space-y-2">
+                            <p className="text-sm text-muted-foreground">Failed methods are listed first.</p>
+                            <div className="flex flex-wrap gap-2">
+                              {currentTopic.snippets.filter(snippet => failedIds.has(snippet.id)).map(snippet => (
+                                <Button
+                                  key={snippet.id}
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8"
+                                  onClick={() => {
+                                    document.getElementById(snippet.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+                                  }}
+                                >
+                                  {ordinals[snippet.id] + 1}. {snippet.title}
+                                </Button>
+                              ))}
+                            </div>
+                          </div>
                         )}
-                      </div>
+                      </section>
                     )}
                   </div>
                   <CodeSnippetContainer
-                    snippets={currentTopic.snippets}
+                    snippets={visibleSnippets}
+                    ordinals={ordinals}
                     showCode={showCode}
                     autoRunId={runQueue[0] ?? null}
                     runToken={runId.current}

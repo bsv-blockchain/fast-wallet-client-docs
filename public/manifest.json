@@ -1,0 +1,93 @@
+{
+  "name": "WalletClient Quickstart — BRC-100 / BRC-116 Test Lab",
+  "short_name": "Wallet Test Lab",
+  "description": "Interactive BRC-100 branches and guided BRC-116 permission tests. Grant only the synthetic test scopes you intend to exercise.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "metanet": {
+    "schemaVersion": 1,
+    "groupPermissions": {
+      "description": "Synthetic test scopes. Select only the grants required by the current guided test.",
+      "spendingAuthorization": {
+        "amount": 100,
+        "description": "100 satoshi monthly test spending authorization; review wallet-estimated fees before approving."
+      },
+      "protocolPermissions": [
+        {
+          "protocolID": [
+            1,
+            "fast grouped alpha"
+          ],
+          "description": "First application-scoped test protocol"
+        },
+        {
+          "protocolID": [
+            1,
+            "fast grouped beta"
+          ],
+          "description": "Second application-scoped test protocol"
+        },
+        {
+          "protocolID": [
+            2,
+            "fast peer grouped alpha"
+          ],
+          "counterparty": "02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5",
+          "description": "First protocol for fixed test peer A"
+        },
+        {
+          "protocolID": [
+            2,
+            "fast peer grouped beta"
+          ],
+          "counterparty": "02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5",
+          "description": "Second protocol for fixed test peer A"
+        }
+      ],
+      "basketAccess": [
+        {
+          "basket": "fast brc116 group",
+          "description": "Synthetic permission-test basket"
+        }
+      ],
+      "certificateAccess": [
+        {
+          "type": "uzPylG20yDZ+LRnB7bFRQt5wYPTe3T7LkcPq+oyJ59Y=",
+          "verifierPublicKey": "02e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13",
+          "fields": [
+            "visible"
+          ],
+          "description": "Reveal only the synthetic visible certificate field to test verifier A"
+        }
+      ]
+    },
+    "counterpartyPermissions": {
+      "description": "Trust this test peer for the two declared PACT protocols in this origin only.",
+      "protocols": [
+        {
+          "protocolName": "fast pact alpha",
+          "description": "First peer trust protocol"
+        },
+        {
+          "protocolName": "fast pact beta",
+          "description": "Second peer trust protocol"
+        }
+      ]
+    }
+  }
+}

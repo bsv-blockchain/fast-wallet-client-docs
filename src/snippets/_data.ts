@@ -1,4 +1,17 @@
-import { ShoppingBag, FileArchive, MessageCircleIcon, Network, Stamp, CreditCard, IdCard, ListChecks } from "lucide-react";
+import branchCrypto from './branches/crypto.ts?raw';
+import branchMetadata from './branches/metadata.ts?raw';
+import branchLists from './branches/lists.ts?raw';
+import branchActions from './branches/actions.ts?raw';
+import branchInternalize from './branches/internalize.ts?raw';
+import branchCertificates from './branches/certificates.ts?raw';
+import type { LucideIcon } from 'lucide-react';
+import reliabilityKeyStability from './reliability/key-stability.ts?raw';
+import reliabilityEncryptionBoundaries from './reliability/encryption-boundaries.ts?raw';
+import reliabilityHmacIntegrity from './reliability/hmac-integrity.ts?raw';
+import reliabilitySignatureIntegrity from './reliability/signature-integrity.ts?raw';
+import reliabilityPagination from './reliability/pagination.ts?raw';
+import keyPermissions from './permissions/key-permissions.ts?raw';
+import { ShoppingBag, FileArchive, MessageCircleIcon, Network, Stamp, CreditCard, IdCard, ListChecks, ShieldCheck, Activity } from "lucide-react";
 import createToken from './basic-tokens/create-token.ts?raw';
 import listTokens from './basic-tokens/list-tokens.ts?raw';
 import redeemToken from './basic-tokens/redeem-token.ts?raw';
@@ -47,7 +60,74 @@ import conformanceRelinquishCertificate from "./conformance/relinquish-certifica
 import conformanceDiscoverByIdentityKey from "./conformance/discover-by-identity-key.ts?raw";
 import conformanceDiscoverByAttributes from "./conformance/discover-by-attributes.ts?raw";
 
-export const topicsData = [
+interface TopicData {
+  id: string;
+  title: string;
+  icon: LucideIcon;
+  description?: string;
+  runIndividually?: boolean;
+  snippets: { id: string; title: string; explanation: string; code: string }[];
+}
+
+const testingTopics: TopicData[] = [
+  { id: "brc116", title: "BRC-116 Guided Permissions", icon: ShieldCheck, runIndividually: true, description: "Manifest-driven grouped, individual, peer-grouped and PACT workflows with app-side evidence plus tester assertions. Set the requested wallet state first, follow each grant/deny instruction, and confirm what the wallet actually displayed. Permission grants may mint on-chain tokens and incur wallet fees. Spending scenarios explicitly identify real broadcasts. Nothing runs until you start a scenario and run a step.", snippets: [] },
+  {
+    id: "branch-matrices", title: "BRC-100 Branch Matrices", icon: ListChecks, runIndividually: true,
+    description: "Run cards individually. Every case is recorded and the matrix continues after failures. Crypto and linkage matrices include privileged=true and may request privileged permission: review each prompt. Counterparties and verifiers are page-created test keys. List matrices need fixtures from the funded workflows; missing data is skipped. These are bounded option matrices, not proof of every wallet-internal code path.",
+    snippets: [
+      { id: "branchMetadataSequence", title: "Authentication and chain metadata sequences", explanation: "Check authentication before and after waiting, repeat version and network calls, and compare headers at height 1 and the current tip. Run while the wallet is locked to exercise the authentication prompt path.", code: branchMetadata },
+      { id: "branchCryptoMatrix", title: "Crypto option matrix", explanation: "24 combinations of security level 0/1/2, omitted/self/anyone/peer counterparty, and privileged false/true. Exercise forSelf omitted/false/true, encryption reciprocity, HMAC rejection, both data and direct-hash signing/verification, and counterparty signatures verified independently with a page-owned peer.", code: branchCrypto },
+      { id: "branchLinkageMatrix", title: "Key-linkage option matrix", explanation: "20 cases cover counterparty linkage and specific linkage at each security level, symbolic versus explicit counterparties, and privileged access. Validate the returned identities, scope, encrypted bytes, and timestamp. Linkage is revealed only to a throwaway verifier created by this page.", code: branchCrypto },
+      { id: "branchActionLists", title: "listActions return and query options", explanation: "67 requests cover all valid combinations of input/output detail flags, script inclusion, label inclusion, any/all query modes, empty labels, limit 1/10000, and offset 1, permission seeking on/off, and any/all queries with one absent label. Run a funded workflow first for nonempty action fixtures.", code: branchLists },
+      { id: "branchOutputLists", title: "listOutputs return and query options", explanation: "55 requests cover omitted/locking scripts/entire transactions, all combinations of tags/labels/custom instructions, any/all tag queries, aggregate BEEF membership, positive and negative offsets, and limit 1/10000, permission seeking on/off, and any/all queries with one absent tag. Run the broadcast option matrix first to populate the dedicated fixture basket.", code: branchLists },
+      { id: "branchCertificateDiscovery", title: "Certificate discovery options", explanation: "16 identity/attribute queries combine limit 1/10000, offset 0/1, and seekPermission true/false. These call the wallet's discovery services; unavailable services and denied permission are recorded as failures.", code: branchCertificates },
+    ],
+  },
+  {
+    id: "funded-workflows", title: "Funded BRC-100 Workflows", icon: CreditCard, runIndividually: true,
+    description: "Use a funded test wallet and run one card at a time. Broadcast cases spend real funds: the broadcast matrix creates 16 one-satoshi outputs, batching creates 10, and internalization creates 6, plus wallet-selected transaction and permission fees. Outputs are intentionally anyone-can-spend test fixtures. NoSend cards reserve inputs temporarily and attempt reverse-order cleanup. A broadcast attempt is never treated as cancellable; inspect the wallet after any network failure. No funds are spent by opening this page.",
+    snippets: [
+      { id: "branchNoSendActions", title: "create → sign → abort option matrix", explanation: "16 noSend cases combine signAndProcess, returnTXIDOnly, randomizeOutputs, and acceptDelayedBroadcast. Parse AtomicBEEF and check returned TXIDs. Abort each fixture in finally, including after an assertion failure.", code: branchActions },
+      { id: "branchExplicitInputs", title: "Explicit input and deferred signing sequences", explanation: "16 noSend parent/child sequences cover a supplied unlocking script versus unlockingScriptLength/signAction, input sequence 0/max, transaction version 1/2, and lockTime 0/1. Supply inputBEEF, knownTxids, trustSelf, and noSendChange; check final script/sequence/version/lockTime and abort both actions.", code: branchActions },
+      { id: "branchBroadcastActions", title: "Broadcast option matrix — spends funds", explanation: "Creates 16 one-satoshi fixture outputs plus transaction fees. Cover immediate/delayed broadcast, automatic/deferred signing, transaction bytes/TXID-only, and randomized/fixed output order. Keep these tagged outputs for the listOutputs matrix.", code: branchActions },
+      { id: "branchSendWithBatches", title: "noSend → noSendChange → sendWith — spends funds", explanation: "Four chained batches use prior noSendChange and knownTxids/trustSelf, then flush through createAction or signAction in immediate/delayed mode. Creates 10 one-satoshi outputs plus fees. Check every batch member's result; cleanup runs only before a broadcast attempt.", code: branchActions },
+      { id: "branchInternalizeProtocols", title: "Internalize payment / insertion / mixed — spends funds", explanation: "Broadcasts three two-output fixture transactions: 6 satoshis plus fees. Exercise wallet payment and basket insertion separately and together, repeat internalization with seekPermission=false, verify no duplicate output, then relinquish only the newly inserted fixture. Payment outputs are recoverable only when their payment branch is internalized.", code: branchInternalize },
+    ],
+  },
+  {
+    id: "certificate-workflows", title: "Certificate BRC-100 Workflows", icon: Stamp, runIndividually: true,
+    description: "These cards acquire certificates, prove selected synthetic fields to page-owned verifier keys, and remove only their exact new serial numbers. Direct certificates use a throwaway local certifier and placeholder revocation outpoints for test purposes. Issuance contacts certify.bsvb.tech and may incur provider or permission fees. Privileged false/true branches request the corresponding wallet authorization.",
+    snippets: [
+      { id: "branchDirectCertificates", title: "Direct acquisition → list → prove → relinquish", explanation: "Four cases combine keyringRevealer=certifier/subject with privileged false/true. Independently sign and encrypt direct certificates. Check certificate filters and pagination, full versus partial certificate descriptors, zero/one/all disclosed fields, verifier decryption, and exact-serial cleanup.", code: branchCertificates },
+      { id: "branchIssuedCertificates", title: "Certifier issuance → list → prove → relinquish", explanation: "Two cases request synthetic certificates from the configured certifier with privileged false/true, exercise the same listing/disclosure branches, and relinquish only the certificate acquired in that case. Server or wallet errors are recorded without assuming they are conformance defects.", code: branchCertificates },
+    ],
+  },
+  {
+    id: "reliability",
+    title: "Reliability",
+    icon: Activity,
+    description: "Deterministic BRC-100 checks for key isolation, byte boundaries, cryptographic integrity, and pagination. Calls run sequentially and may request wallet permission. These probes do not create transactions or certificates. Keep the wallet idle for pagination; an empty or changing dataset is reported as skipped. A transport failure is always a failure, including in negative tests.",
+    snippets: [
+      { id: "reliabilityKeyStability", title: "Stable and isolated keys", explanation: "Repeat identity and derived-key requests, then change the key ID and protocol. Identical requests must return identical valid keys; different scopes must produce different keys.", code: reliabilityKeyStability },
+      { id: "reliabilityEncryptionBoundaries", title: "Byte boundary round trips", explanation: "Encrypt and decrypt seven fixed payloads: empty, 1, 16, 255, 256, and 1024 bytes, plus Unicode and a null byte. Compare every recovered byte.", code: reliabilityEncryptionBoundaries },
+      { id: "reliabilityHmacIntegrity", title: "HMAC integrity and isolation", explanation: "Verify a fresh HMAC and its determinism, then require invalid-HMAC errors for changed data, a changed HMAC, and a different key. Generic wallet failures do not count as rejection.", code: reliabilityHmacIntegrity },
+      { id: "reliabilitySignatureIntegrity", title: "Data and direct-hash signatures", explanation: "Cross-check both signing modes against both verification modes. Changed data and a different key must return invalid-signature errors.", code: reliabilitySignatureIntegrity },
+      { id: "reliabilityPagination", title: "Stable pagination", explanation: "Read up to three two-record pages of conformance actions and random-basket outputs, then recheck the first page. Check limits, totals, omitted records, and duplicates. Skips when no fixtures exist or records change during the run.", code: reliabilityPagination },
+    ],
+  },
+  {
+    id: "permissions",
+    title: "Permissions",
+    icon: ShieldCheck,
+    description: "Interactive permission checks: run each card individually and make the stated choice in your wallet. Each run uses a fresh level-2 counterparty and key ID. Reset any origin-wide or blanket grants for this site first and use a wallet that enforces permissions. Approval may persist a grant for the protocol/counterparty; remove it in wallet settings afterward if desired. Wallet permission-token fees may apply. The requested key is derived for this test scope.",
+    snippets: [
+      { id: "permissionAllowKey", title: "Approve a scoped key request", explanation: "Click Run, then approve the request in your wallet. The same scoped key must be available on a second call with seekPermission=false. Use an approval that grants this scope, rather than a one-time grant.", code: keyPermissions },
+      { id: "permissionDenyKey", title: "Deny a scoped key request", explanation: "Click Run, then deny the request in your wallet. Require a permission-denied error, then verify a seekPermission=false retry is also denied. A successful response fails this check; connection failures do not count as denials.", code: keyPermissions },
+    ],
+  },
+]
+
+export const topicsData: TopicData[] = [
   {
     id: "tokens",
     title: "Token Creation and Redemption",
@@ -386,5 +466,6 @@ export const topicsData = [
         code: conformanceDiscoverByAttributes
       }
     ]
-  }
+  },
+  ...testingTopics,
 ];

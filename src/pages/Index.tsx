@@ -4,9 +4,12 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { CodeSnippetContainer } from "@/components/CodeSnippetContainer";
+import { PermissionGuide } from "@/components/PermissionGuide";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { topicsData } from "@/snippets/_data";
+
+import type { SnippetResult } from '@/lib/snippet-runner';
 
 const SHOW_CODE_KEY = "fast-wallet-show-code";
 
@@ -18,7 +21,7 @@ function readShowCode() {
   }
 }
 
-type RunResult = { id: string; title: string; ok: boolean };
+type RunResult = SnippetResult & { id: string; title: string };
 
 function orderWithFailuresFirst<T extends { id: string }>(snippets: T[], failedIds: Set<string>): T[] {
   const order = new Map(snippets.map((snippet, index) => [snippet.id, index]));
@@ -35,7 +38,8 @@ const Index = () => {
   const [runQueue, setRunQueue] = useState<string[]>([]);
   const [report, setReport] = useState<RunResult[]>([]);
   const runId = useRef(0);
-  const runTitles = useRef<Record<string, string>>({});
+  const stopAfterCurrent = useRef(false);
+  const [runningSnippet, setRunningSnippet] = useState<string | null>(null);
   const scoreRef = useRef<HTMLElement>(null);
   const sawRunning = useRef(false);
   const [searchParams] = useSearchParams();
@@ -47,6 +51,17 @@ const Index = () => {
     : undefined;
   const topicFromQuery = topicsData.find(topic => topic.id === searchParams.get("topic"));
   const currentTopic = topicFromSnippet ?? topicFromQuery ?? topicsData[0];
+  const previousTopic = useRef(currentTopic.id);
+
+  useEffect(() => {
+    // Also invalidate reports after browser history / direct query changes.
+    if (previousTopic.current === currentTopic.id) return;
+    previousTopic.current = currentTopic.id;
+    runId.current += 1;
+    stopAfterCurrent.current = true;
+    setRunQueue([]);
+    setReport([]);
+  }, [currentTopic.id]);
 
   useEffect(() => {
     try {
@@ -64,7 +79,15 @@ const Index = () => {
     return () => window.clearTimeout(handle);
   }, [snippetId, currentTopic.id]);
 
+  const runIndividually = currentTopic.id === "permissions" || currentTopic.runIndividually;
+  const isMatrix = ["branch-matrices", "funded-workflows", "certificate-workflows"].includes(currentTopic.id);
+  const handleRunningChange = (id: string | null) => {
+    if (id && !runQueue.length) stopAfterCurrent.current = false;
+    setRunningSnippet(id);
+  };
+
   const changeTopic = (topicId: string) => {
+    if (runningSnippet || runQueue.length > 0) return;
     runId.current += 1;
     setRunQueue([]);
     setReport([]);
@@ -72,32 +95,48 @@ const Index = () => {
   };
 
   const runAll = () => {
-    if (!currentTopic || runQueue.length > 0) return;
+    if (!currentTopic || runQueue.length > 0 || runningSnippet || runIndividually) return;
+    stopAfterCurrent.current = false;
     runId.current += 1;
-    runTitles.current = Object.fromEntries(
-      currentTopic.snippets.map(snippet => [snippet.id, snippet.title])
-    );
     setReport([]);
     setRunQueue(currentTopic.snippets.map(snippet => snippet.id));
   };
 
-  const handleAutoRunComplete = (id: string, ok: boolean, token: number) => {
+  const handleRunComplete = (id: string, result: SnippetResult, token: number) => {
     if (token !== runId.current) return;
-    setRunQueue(queue => (queue[0] === id ? queue.slice(1) : queue));
-    setReport(results => {
-      if (results.some(result => result.id === id)) return results;
-      return [...results, { id, title: runTitles.current[id] ?? id, ok }];
-    });
+    setRunQueue(queue => queue[0] === id ? (stopAfterCurrent.current ? [] : queue.slice(1)) : queue);
+    setReport(results => [
+      ...results.filter(previous => previous.id !== id),
+      { id, title: currentTopic.snippets.find(snippet => snippet.id === id)?.title ?? id, ...result },
+    ]);
+  };
+
+  const downloadReport = () => {
+    // Summaries only: omit wallet payloads, output logs, keys and transaction data.
+    const summary = {
+      schemaVersion: 1,
+      topic: currentTopic.id,
+      exportedAt: new Date().toISOString(),
+      results: report.map(({ id, title, status, durationMs, errorCode, cases }) => ({
+        id, title, status, durationMs, errorCode,
+        ...(cases ? { cases: cases.map(({ id, status, durationMs, errorCode }) => ({ id, status, durationMs, errorCode })) } : {}),
+      })),
+    };
+    const url = URL.createObjectURL(new Blob([JSON.stringify(summary, null, 2)], { type: 'application/json' }));
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `fast-wallet-${currentTopic.id}-results.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
   };
 
   const runningAll = runQueue.length > 0;
-  const runProgress = currentTopic
-    ? currentTopic.snippets.length - runQueue.length + (runningAll ? 1 : 0)
-    : 0;
-  const passedCount = report.filter(result => result.ok).length;
-  const failedCount = report.length - passedCount;
-  const showScore = report.length > 0 && !runningAll;
-  const failedIds = new Set(report.filter(result => !result.ok).map(result => result.id));
+  const runProgress = report.length + (runningAll ? 1 : 0);
+  const passedCount = report.filter(result => result.status === 'passed').length;
+  const failedCount = report.filter(result => result.status === 'failed').length;
+  const skippedCount = report.filter(result => result.status === 'skipped').length;
+  const showScore = report.length > 0 && !runningAll && !runningSnippet;
+  const failedIds = new Set(report.filter(result => result.status === 'failed').map(result => result.id));
   const visibleSnippets = currentTopic && showScore
     ? orderWithFailuresFirst(currentTopic.snippets, failedIds)
     : currentTopic?.snippets ?? [];
@@ -135,6 +174,7 @@ const Index = () => {
               <ThemeToggle />
             </div>
             <div className="flex flex-wrap items-center gap-2 px-3 pb-2">
+              {currentTopic.snippets.length > 0 && <>
               <label className="sr-only" htmlFor="snippet-jump">Jump to example</label>
               <select
                 id="snippet-jump"
@@ -161,19 +201,22 @@ const Index = () => {
               >
                 {showCode ? "Hide code" : "Show code"}
               </Button>
-              <Button
+              </>}
+              {!runIndividually && <Button
                 type="button"
                 size="sm"
                 className="h-9 shrink-0 bg-green-600 text-white hover:bg-green-700"
                 onClick={runAll}
-                disabled={!currentTopic || runningAll}
+                disabled={!currentTopic || runningAll || !!runningSnippet}
               >
                 {runningAll
                   ? `Running ${currentTopic?.snippets.find(snippet => snippet.id === runQueue[0])?.title ?? ""} (${runProgress} of ${currentTopic?.snippets.length})`
                   : currentTopic?.id === "conformance"
                     ? "Run conformance"
                     : "Run all"}
-              </Button>
+              </Button>}
+              {(runningAll || (runningSnippet && isMatrix)) && <Button type="button" variant="outline" size="sm" onClick={() => { stopAfterCurrent.current = true; setRunQueue(queue => queue.slice(0, 1)); }}>{runningAll ? "Stop after current" : "Stop after current case"}</Button>}
+              {report.length > 0 && !runningAll && !runningSnippet && <Button type="button" variant="outline" size="sm" onClick={downloadReport}>Download results</Button>}
             </div>
           </header>
 
@@ -191,6 +234,7 @@ const Index = () => {
               {currentTopic && (
                 <div className="space-y-6">
                   <div className="space-y-3">
+                    {(runningSnippet || runningAll) && <p role="status" className="text-sm text-muted-foreground">A wallet request is running. Finish or dismiss its wallet prompt before starting another test or changing categories.</p>}
                     <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
                       {currentTopic.title}
                     </h2>
@@ -218,6 +262,7 @@ const Index = () => {
                             <span className="rounded-md bg-green-600 px-2 py-1 font-medium text-white">
                               {passedCount} passed
                             </span>
+                            {skippedCount > 0 && <span className="rounded-md bg-muted px-2 py-1 font-medium">{skippedCount} skipped</span>}
                             {failedCount > 0 && (
                               <span className="rounded-md bg-destructive px-2 py-1 font-medium text-destructive-foreground">
                                 {failedCount} failed
@@ -234,7 +279,7 @@ const Index = () => {
                           <div className="bg-destructive" style={{ width: `${(failedCount / report.length) * 100}%` }} />
                         </div>
                         {failedCount === 0 ? (
-                          <p className="mt-3 text-sm text-muted-foreground">Every method returned a valid response.</p>
+                          <p className="mt-3 text-sm text-muted-foreground">{skippedCount > 0 ? "Completed checks passed; skipped checks need another run." : "All completed checks passed."}</p>
                         ) : (
                           <div className="mt-3 space-y-2">
                             <p className="text-sm text-muted-foreground">Failed methods are listed first.</p>
@@ -259,6 +304,7 @@ const Index = () => {
                       </section>
                     )}
                   </div>
+                  {currentTopic.id === "brc116" && <PermissionGuide onRunningChange={setRunningSnippet} />}
                   <CodeSnippetContainer
                     snippets={visibleSnippets}
                     ordinals={ordinals}
@@ -266,7 +312,10 @@ const Index = () => {
                     autoRunId={runQueue[0] ?? null}
                     runToken={runId.current}
                     runAllActive={runningAll}
-                    onAutoRunComplete={handleAutoRunComplete}
+                    onRunComplete={handleRunComplete}
+                    anySnippetRunning={!!runningSnippet}
+                    onRunningChange={handleRunningChange}
+                    shouldStop={() => stopAfterCurrent.current}
                   />
                 </div>
               )}

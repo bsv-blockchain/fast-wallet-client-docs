@@ -1,3 +1,15 @@
+import { branchCryptoMatrix, branchLinkageMatrix } from './branches/crypto'
+import { branchMetadataSequence } from './branches/metadata'
+import { branchActionLists, branchOutputLists } from './branches/lists'
+import { branchNoSendActions, branchBroadcastActions, branchSendWithBatches, branchExplicitInputs } from './branches/actions'
+import { branchInternalizeProtocols } from './branches/internalize'
+import { branchDirectCertificates, branchIssuedCertificates, branchCertificateDiscovery } from './branches/certificates'
+import { reliabilityKeyStability } from './reliability/key-stability'
+import { reliabilityEncryptionBoundaries } from './reliability/encryption-boundaries'
+import { reliabilityHmacIntegrity } from './reliability/hmac-integrity'
+import { reliabilitySignatureIntegrity } from './reliability/signature-integrity'
+import { reliabilityPagination } from './reliability/pagination'
+import { permissionAllowKey, permissionDenyKey } from './permissions/key-permissions'
 import { createToken } from './basic-tokens/create-token'
 import { download } from './distributed-data/download'
 import { listTokens } from './basic-tokens/list-tokens'
@@ -47,6 +59,27 @@ import { conformanceDiscoverByIdentityKey } from './conformance/discover-by-iden
 import { conformanceDiscoverByAttributes } from './conformance/discover-by-attributes'
 
 export default {
+    branchCryptoMatrix,
+    branchLinkageMatrix,
+    branchMetadataSequence,
+    branchActionLists,
+    branchOutputLists,
+    branchNoSendActions,
+    branchBroadcastActions,
+    branchSendWithBatches,
+    branchExplicitInputs,
+    branchInternalizeProtocols,
+    branchDirectCertificates,
+    branchIssuedCertificates,
+    branchCertificateDiscovery,
+
+    reliabilityKeyStability,
+    reliabilityEncryptionBoundaries,
+    reliabilityHmacIntegrity,
+    reliabilitySignatureIntegrity,
+    reliabilityPagination,
+    permissionAllowKey,
+    permissionDenyKey,
     createToken,
     listTokens,
     redeemToken,

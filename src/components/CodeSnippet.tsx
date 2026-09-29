@@ -11,17 +11,7 @@ import { oneDark, oneLight } from 'react-syntax-highlighter/dist/esm/styles/pris
 import { useTheme } from "@/components/ThemeProvider";
 import snippets from '../snippets'
 
-const snippetRuns = new Map<string, Promise<boolean>>()
-
-function runSnippetOnce(id: string, run: () => Promise<boolean>): Promise<boolean> {
-  const existing = snippetRuns.get(id)
-  if (existing) return existing
-  const promise = run().finally(() => {
-    if (snippetRuns.get(id) === promise) snippetRuns.delete(id)
-  })
-  snippetRuns.set(id, promise)
-  return promise
-}
+import { executeSnippet, runSnippetOnce, type SnippetResult } from '@/lib/snippet-runner'
 
 interface Snippet {
   id: string;
@@ -37,7 +27,10 @@ interface CodeSnippetProps {
   autoRun: boolean;
   runToken: number;
   runAllActive: boolean;
-  onAutoRunComplete: (id: string, ok: boolean, token: number) => void;
+  onRunComplete: (id: string, result: SnippetResult, token: number) => void;
+  anySnippetRunning: boolean;
+  onRunningChange: (id: string | null) => void;
+  shouldStop?: () => boolean;
 }
 
 export function CodeSnippet({
@@ -47,19 +40,22 @@ export function CodeSnippet({
   autoRun,
   runToken,
   runAllActive,
-  onAutoRunComplete,
+  onRunComplete,
+  anySnippetRunning,
+  onRunningChange,
+  shouldStop,
 }: CodeSnippetProps) {
   const [output, setOutput] = useState<string>("");
   const [isRunning, setIsRunning] = useState(false);
+  const [result, setResult] = useState<SnippetResult | null>(null);
   const [copied, setCopied] = useState(false);
   const [shared, setShared] = useState(false);
   const [codeOpen, setCodeOpen] = useState(showCode);
   const { theme } = useTheme();
   const location = useLocation();
-  const runCodeRef = useRef<() => Promise<boolean>>(async () => false);
-  const onAutoRunCompleteRef = useRef(onAutoRunComplete);
-  const autoRunStarted = useRef(false);
-  onAutoRunCompleteRef.current = onAutoRunComplete;
+  const runCodeRef = useRef<() => Promise<SnippetResult>>();
+  const onRunCompleteRef = useRef(onRunComplete);
+  onRunCompleteRef.current = onRunComplete;
 
   useEffect(() => {
     setCodeOpen(showCode);
@@ -71,13 +67,17 @@ export function CodeSnippet({
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? oneDark : oneLight;
   };
 
-  const runCode = async (): Promise<boolean> => {
+  const runCode = async (): Promise<SnippetResult> => {
     setIsRunning(true);
+    onRunningChange(snippet.id);
+    setResult(null);
     setOutput("");
-
-    try {
-      const logs: string[] = [];
+    const logs: string[] = [];
+    const cases: (SnippetResult & { id: string })[] = [];
+    const completed = await executeSnippet(async () => {
       const customConsole = {
+        shouldStop,
+        case: (id: string, result: SnippetResult) => cases.push({ id, ...result }),
         log: (...args: unknown[]) => {
           const cleanObject = (obj: unknown): unknown => {
             if (obj === null || typeof obj !== 'object') {
@@ -110,28 +110,25 @@ export function CodeSnippet({
 
       await snippets[snippet.id](customConsole);
 
-      setOutput(logs.length > 0 ? logs.join('\n') : "Code executed successfully (no output)");
-      return true;
-    } catch (error) {
-      setOutput(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      return false;
-    } finally {
-      setIsRunning(false);
-    }
+    });
+    if (cases.length > 0) completed.cases = cases;
+    setOutput([
+      ...logs,
+      ...(completed.message ? [`${completed.status === 'skipped' ? 'Skipped' : 'Error'}: ${completed.message}`] : []),
+    ].join('\n') || "Code executed successfully (no output)");
+    setResult(completed);
+    setIsRunning(false);
+    onRunningChange(null);
+    return completed;
   };
   runCodeRef.current = runCode;
 
   useEffect(() => {
-    if (!autoRun) {
-      autoRunStarted.current = false;
-      return;
-    }
-    if (autoRunStarted.current) return;
-    autoRunStarted.current = true;
+    if (!autoRun) return;
     let active = true;
     document.getElementById(snippet.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    void runSnippetOnce(`${runToken}:${snippet.id}`, () => runCodeRef.current()).then(ok => {
-      if (active) onAutoRunCompleteRef.current(snippet.id, ok, runToken);
+    void runSnippetOnce(`${runToken}:${snippet.id}`, () => runCodeRef.current()).then(completed => {
+      if (active) onRunCompleteRef.current(snippet.id, completed, runToken);
     });
     return () => {
       active = false;
@@ -168,7 +165,7 @@ export function CodeSnippet({
     }
   };
 
-  const failed = output.startsWith("Error:");
+  const failed = result?.status === 'failed';
 
   return (
     <Card id={snippet.id} className="w-full scroll-mt-32 border border-border shadow-lg">
@@ -214,8 +211,12 @@ export function CodeSnippet({
 
         <div className="flex flex-wrap gap-2">
           <Button
-            onClick={runCode}
-            disabled={isRunning || (runAllActive && !autoRun)}
+            onClick={() => {
+              void runSnippetOnce(`${runToken}:${snippet.id}`, runCode).then(completed => {
+                onRunCompleteRef.current(snippet.id, completed, runToken);
+              });
+            }}
+            disabled={isRunning || anySnippetRunning || runAllActive}
             className="bg-green-600 text-white transition-all duration-200 hover:bg-green-700"
           >
             <Play className="mr-2 h-4 w-4" />
@@ -258,7 +259,7 @@ export function CodeSnippet({
             <div className="mb-2 flex items-center gap-2">
               <h4 className="text-sm font-medium text-foreground">Output</h4>
               <Badge variant={failed ? "destructive" : "secondary"}>
-                {failed ? "Failed" : "Valid response"}
+                {failed ? 'Failed' : result?.status === 'skipped' ? 'Skipped' : 'Passed'}
               </Badge>
             </div>
             <pre className="whitespace-pre-wrap break-words text-sm text-muted-foreground">

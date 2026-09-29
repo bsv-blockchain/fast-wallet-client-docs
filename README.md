@@ -4,6 +4,8 @@
 
 Practical BSV application snippets for the current `@bsv/sdk` v2 `WalletClient` and BRC-100 wallet interface. The examples focus on browser and application code that works with BSV Desktop, BSV Browser, or another compatible BRC-100 wallet. The Conformance page runs all 28 WalletInterface methods, one after another, against whatever wallet the browser is using. Code samples stay collapsed until you show them.
 
+The testing categories add 247 named branch cases, byte-boundary and stability probes, funded transaction sequences, certificate workflows, and 19 guided BRC-116 scenarios. Guided scenarios require both valid app evidence and the tester's confirmation of the wallet UI. See the [coverage map and tester instructions](docs/wallet-testing.md) for prerequisites, spending amounts, and interpretation of results.
+
 ## Live Site
 
 [https://fast.brc.dev](https://fast.brc.dev)
@@ -32,6 +34,10 @@ Before opening a PR, run:
 
 ```bash
 npm run lint
+npm test
+npm run typecheck
 npm run build
 npm run build:snippets
 ```
+
+Use Node.js 22 or later and `npm ci` for the locked dependency versions. Automated tests run offline with SDK cryptography and transaction fixtures; live wallet prompts, real broadcasts, and external certificate issuance are exercised through the app by a tester. GitHub Actions runs the same checks on pull requests.

@@ -1,28 +1,27 @@
-import { Hash, P2PKH, PublicKey, Random, Transaction, Utils } from '@bsv/sdk'
+import { Hash, KeyDeriver, P2PKH, PrivateKey, Random, Transaction, Utils } from '@bsv/sdk'
 import { brc29ProtocolID } from '@bsv/wallet-toolbox-client'
 import { conformanceWallet } from './support'
 
 export async function conformanceInternalizeAction(runner) {
   const wallet = conformanceWallet()
-  const { publicKey: identityKey } = await wallet.getPublicKey({ identityKey: true })
+  // The page is a separate payer. Asking the wallet for a BRC-29 key toward its
+  // own identity is refused by the wallet vault.
+  const payer = PrivateKey.fromRandom()
+  const { publicKey: walletIdentityKey } = await wallet.getPublicKey({ identityKey: true })
   const prefixBytes = Random(12)
   const derivationPrefix = Utils.toBase64(prefixBytes)
   const derivationSuffix = Utils.toBase64(Hash.sha512hmac(prefixBytes, 'output_0'))
   const keyID = `${derivationPrefix} ${derivationSuffix}`
-  const { publicKey } = await wallet.getPublicKey({
-    protocolID: brc29ProtocolID,
-    keyID,
-    counterparty: identityKey
-  })
-  const lockingScript = new P2PKH().lock(PublicKey.fromString(publicKey).toAddress()).toHex()
+  const paymentKey = new KeyDeriver(payer).derivePublicKey(brc29ProtocolID, keyID, walletIdentityKey)
+  const lockingScript = new P2PKH().lock(paymentKey.toAddress()).toHex()
 
-  // Broadcasts a 1-satoshi payment back to this wallet, then internalizes it.
+  // Broadcasts a 1-satoshi payment from the page key into this wallet.
   const created = await wallet.createAction({
-    description: 'conformance self payment',
+    description: 'conformance incoming payment',
     outputs: [{
       satoshis: 1,
       lockingScript,
-      outputDescription: 'conformance self payment'
+      outputDescription: 'conformance incoming payment'
     }],
     options: {
       acceptDelayedBroadcast: false,
@@ -33,7 +32,7 @@ export async function conformanceInternalizeAction(runner) {
 
   const tx = Array.from(created.tx)
   const transaction = Transaction.fromAtomicBEEF(tx)
-  const target = PublicKey.fromString(publicKey).toHash('hex')
+  const target = paymentKey.toHash('hex')
   let outputIndex = -1
   transaction.outputs.forEach((output, vout) => {
     if (Utils.toHex(output.lockingScript.chunks[2].data) === target) outputIndex = vout
@@ -49,7 +48,7 @@ export async function conformanceInternalizeAction(runner) {
       paymentRemittance: {
         derivationPrefix,
         derivationSuffix,
-        senderIdentityKey: identityKey
+        senderIdentityKey: payer.toPublicKey().toString()
       }
     }]
   })

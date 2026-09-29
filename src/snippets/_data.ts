@@ -215,7 +215,7 @@ export const topicsData = [
     id: "conformance",
     title: "Conformance",
     icon: ListChecks,
-    description: "All 28 BRC-100 WalletInterface methods. Run conformance calls them one at a time and continues after a failure. A card passes when @bsv/sdk accepts the wallet's response. createAction, signAction, and abortAction use noSend and then abort, so they do not broadcast. internalizeAction broadcasts a 1-satoshi payment back to this wallet. relinquishOutput broadcasts 1 satoshi into the conformance basket and then stops tracking it. acquireCertificate requests a conformance-probe certificate, and relinquishCertificate removes only that certificate.",
+    description: "All 28 BRC-100 WalletInterface methods. Run conformance calls them one at a time and continues after a failure. A card passes when @bsv/sdk accepts the wallet's response. createAction, signAction, and abortAction use noSend and then abort, so they do not broadcast. internalizeAction has this page pay the wallet 1 satoshi from a throwaway key, then internalizes that payment. relinquishOutput broadcasts 1 satoshi into the conformance basket and then stops tracking it. acquireCertificate requests a conformance-probe certificate, and relinquishCertificate removes only that certificate.",
     snippets: [
       {
         id: "conformanceIsAuthenticated",
@@ -340,7 +340,7 @@ export const topicsData = [
       {
         id: "conformanceInternalizeAction",
         title: "internalizeAction",
-        explanation: "Broadcasts a 1-satoshi payment back to this wallet, then internalizes that output. The network fee is spent. The satoshi returns to the balance when internalization succeeds.",
+        explanation: "A throwaway key on this page pays the wallet 1 satoshi. The wallet internalizes that payment. The network fee is spent, and the satoshi returns to the balance when internalization succeeds.",
         code: conformanceInternalizeAction
       },
       {

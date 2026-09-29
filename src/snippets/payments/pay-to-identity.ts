@@ -8,10 +8,12 @@ export async function payToIdentity(runner) {
 
   const wallet = createWalletClient()
 
-  // Consider this like a payment id
-  const derivationPrefix = Utils.toBase64(Random(12))
+  // Consider this like a payment id. The other payment snippets share these
+  // values as base64. Hash.sha512hmac accepts the key as bytes or hex.
+  const derivationPrefixBytes = Random(12)
+  const derivationPrefix = Utils.toBase64(derivationPrefixBytes)
   // This must be unique for every key
-  const derivationSuffix = Utils.toBase64(Hash.sha512hmac(derivationPrefix,'output_0'))
+  const derivationSuffix = Utils.toBase64(Hash.sha512hmac(derivationPrefixBytes, 'output_0'))
 
   // repeat for as many outputs as you want
   const keyID = `${derivationPrefix} ${derivationSuffix}`

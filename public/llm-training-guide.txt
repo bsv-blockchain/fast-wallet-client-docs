@@ -247,9 +247,12 @@ import { brc29ProtocolID } from '@bsv/wallet-toolbox-client'
 const wallet = new WalletClient()
 const bobIdentityKey = '025706528f0f6894b2ba505007267ccff1133e004452a1f6b72ac716f246216366'
 
-// Generate unique derivation parameters
-const derivationPrefix = Utils.toBase64(Random(12))
-const derivationSuffix = Utils.toBase64(Hash.sha512hmac(derivationPrefix, 'output_0'))
+// Generate unique derivation parameters.
+// The shared prefix and suffix stay base64. Hash.sha512hmac reads a string key as hex,
+// so the HMAC key is the raw prefix bytes.
+const derivationPrefixBytes = Random(12)
+const derivationPrefix = Utils.toBase64(derivationPrefixBytes)
+const derivationSuffix = Utils.toBase64(Hash.sha512hmac(derivationPrefixBytes, 'output_0'))
 
 // Derive public key for this specific payment
 const keyID = `${derivationPrefix} ${derivationSuffix}`
@@ -1341,7 +1344,7 @@ Key IDs must be unique to prevent key reuse and maintain privacy.
 Strategies:
 - Timestamp: Date.now().toString()
 - Random: Utils.toBase64(Random(12))
-- Derived: Hash.sha512hmac(prefix, 'suffix')
+- Derived: Hash.sha512hmac(prefixBytes, 'suffix')
 - Sequential: incrementing counter
 - Combined: prefix + ' ' + suffix
 
@@ -1353,8 +1356,9 @@ Critical for:
 Example:
 ```typescript
 // Payment scenario
-const prefix = Utils.toBase64(Random(12)) // Share with recipient
-const suffix = Utils.toBase64(Hash.sha512hmac(prefix, `output_${i}`))
+const prefixBytes = Random(12)
+const prefix = Utils.toBase64(prefixBytes) // Share with recipient
+const suffix = Utils.toBase64(Hash.sha512hmac(prefixBytes, `output_${i}`))
 const keyID = `${prefix} ${suffix}` // Unique per output
 ```
 
@@ -1555,10 +1559,10 @@ Cryptographic hash functions for data integrity and derivation.
 
 Available Functions:
 ```typescript
-import { Hash, Utils } from '@bsv/sdk'
+import { Hash } from '@bsv/sdk'
 
-// SHA512 HMAC (keyed hash)
-const hmac = Hash.sha512hmac(key, data)
+// String keys are hexadecimal. Pass a byte array for any other key.
+const hmac = Hash.sha512hmac(keyBytes, data)
 
 // SHA256 (standard hash)
 const hash = Hash.sha256(data)
@@ -1568,7 +1572,7 @@ const ripemd = Hash.ripemd160(data)
 ```
 
 Common Patterns:
-- Payment derivation: Hash.sha512hmac(prefix, outputIdentifier)
+- Payment derivation: Hash.sha512hmac(prefixBytes, outputIdentifier), then base64-encode the digest. The prefix shared with the recipient stays base64.
 - Data integrity: Hash.sha256(fileData)
 - Address generation: Hash.ripemd160(publicKeyHash)
 

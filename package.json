@@ -14,9 +14,9 @@
     "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit"
   },
   "dependencies": {
-    "@bsv/message-box-client": "^2.5.4",
-    "@bsv/sdk": "^2.8.11",
-    "@bsv/wallet-toolbox-client": "^2.14.4",
+    "@bsv/message-box-client": "^2.6.0",
+    "@bsv/sdk": "^3.2.0",
+    "@bsv/wallet-toolbox-client": "^2.14.6",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",

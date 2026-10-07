@@ -227,7 +227,7 @@ const Index = () => {
                   WalletClient Quickstart
                 </h1>
                 <p className="text-base text-muted-foreground sm:text-xl">
-                  Current BRC-100 snippets for BSV apps using @bsv/sdk v2
+                  Current BRC-100 snippets for BSV apps using @bsv/sdk v3
                 </p>
               </div>
 

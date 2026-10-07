@@ -2,7 +2,7 @@
 
 ![image](https://github.com/user-attachments/assets/81ec0c48-ae42-4a98-8369-73d9bb34fd4b)
 
-Practical BSV application snippets for the current `@bsv/sdk` v2 `WalletClient` and BRC-100 wallet interface. The examples focus on browser and application code that works with BSV Desktop, BSV Browser, or another compatible BRC-100 wallet. The Conformance page runs all 28 WalletInterface methods, one after another, against whatever wallet the browser is using. Code samples stay collapsed until you show them.
+Practical BSV application snippets for the current `@bsv/sdk` v3 `WalletClient` and BRC-100 wallet interface. The examples focus on browser and application code that works with BSV Desktop, BSV Browser, or another compatible BRC-100 wallet. The Conformance page runs all 28 WalletInterface methods, one after another, against whatever wallet the browser is using. Code samples stay collapsed until you show them.
 
 The testing categories add 247 named branch cases, byte-boundary and stability probes, funded transaction sequences, certificate workflows, and 19 guided BRC-116 scenarios. Guided scenarios require both valid app evidence and the tester's confirmation of the wallet UI. See the [coverage map and tester instructions](docs/wallet-testing.md) for prerequisites, spending amounts, and interpretation of results.
 
@@ -12,10 +12,11 @@ The testing categories add 247 named branch cases, byte-boundary and stability p
 
 ## Current Stack
 
-- `@bsv/sdk` v2.8 for WalletClient, transactions, crypto, storage, overlays, and certificates.
-- `@bsv/wallet-toolbox-client` v2.14 for BRC-29 and server-wallet examples.
-- `@bsv/message-box-client` v2.5 for MessageBox examples.
+- `@bsv/sdk` v3.2 for WalletClient, transactions, crypto, storage, overlays, certificates, and identity search.
+- `@bsv/wallet-toolbox-client` v2.14 for BRC-29 and server-wallet examples (SDK 3 peer).
+- `@bsv/message-box-client` v2.6 for MessageBox examples (SDK 3 peer).
 - BSV Desktop or another BRC-100 wallet for user authorization and signing. Inside a mobile shell the examples bind `window.CWI` or `ReactNativeWebView` directly, because those wallets answer the bridge with status `ok`.
+- React apps can use [`@bsv/identity-react` 2.x](https://github.com/bsv-blockchain/identity-react) for the identity search field. That release requires React 18 and Node 22, and adopts the SDK 3.2 identity search recovery API shown in the Identity examples.
 
 ## Missing Examples
 

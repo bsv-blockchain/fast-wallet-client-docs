@@ -20,7 +20,7 @@ const wallet = createWalletClient()
 Key Concepts:
 - createWalletClient binds an injected window.CWI or ReactNativeWebView directly
 - Mobile shells answer the React Native bridge with status "ok"
-- @bsv/sdk 2.8 auto-discovery waits one second and accepts only status "success", so new WalletClient('auto') reports that no wallet exists inside those shells
+- Built-in @bsv/sdk auto-discovery waits one second and accepts only status "success", so new WalletClient('auto') reports that no wallet exists inside those shells
 - Desktop wallets with no injection still use auto-discovery (window.CWI, HTTP, then XDM)
 - Pass an originator when the app has one: createWalletClient('example.com')
 
@@ -160,34 +160,126 @@ Script Matching Rules:
 SECTION 3: IDENTITY RESOLUTION AND KEY MANAGEMENT
 =====================================================================================================
 
-SKILL: Resolve Identity Keys by Attributes
--------------------------------------------
-Discover public keys associated with user attributes using identity services.
+SKILL: Resolve Identities with SDK 3.2 Search Recovery
+-------------------------------------------------------
+Discover displayable identities by attributes or by identity key. Contacts
+lookups are optional and off by default. Opt in with { useContacts: true }.
 
 Pattern:
 ```typescript
 import { IdentityClient } from '@bsv/sdk'
 
+const SAVED_CONTACTS_WARNING =
+  'Saved contacts are unavailable. Results may exclude saved contacts.'
+const PUBLIC_LOOKUP_FAILURE =
+  'Identity lookup failed. Check wallet access and try again.'
+
 const identityClient = new IdentityClient()
-const response = await identityClient.resolveByAttributes({
-  attributes: {
-    userName: 'deggen'
+const completeResults = new Map()
+let queryGeneration = 0
+
+// Contacts are optional. The 2s deadline bounds only the Contacts wait.
+// It does not cancel a wallet request or dismiss a permission prompt.
+function resolutionOptions(onPartial) {
+  return {
+    useContacts: true,
+    contactErrorMode: 'fallback',
+    contactTimeoutMs: 2000,
+    onContactError() {
+      onPartial()
+    }
   }
-})
-const identityKey = response[0]
+}
+
+async function lookup(cacheKey, queryGenerationAtStart, run) {
+  let partial = false
+  try {
+    const identities = await run(resolutionOptions(() => {
+      partial = true
+    }))
+    // A newer query, retry, or selection owns the screen. Drop this answer.
+    if (queryGenerationAtStart !== queryGeneration) return { status: 'superseded' }
+    if (!partial) completeResults.set(cacheKey, identities)
+    return { status: 'ok', identities, partial }
+  } catch {
+    if (queryGenerationAtStart !== queryGeneration) return { status: 'superseded' }
+    return { status: 'failed' }
+  }
+}
+
+async function recover(cacheKey, run) {
+  const generation = ++queryGeneration
+  const cached = completeResults.get(cacheKey)
+  if (cached) return cached
+  const outcome = await lookup(cacheKey, generation, run)
+  if (outcome.status === 'superseded') return
+  // Public failure is not an empty result. Do not cache it or invent an identity.
+  if (outcome.status === 'failed') throw new Error(PUBLIC_LOOKUP_FAILURE)
+  if (outcome.partial) console.warn(SAVED_CONTACTS_WARNING)
+  return outcome.identities
+}
+
+// Repeat the same query after the user chooses Retry. This drops any stored
+// answer and supersedes the failed query, so a late response cannot replace it.
+async function retry(cacheKey, run) {
+  completeResults.delete(cacheKey)
+  return recover(cacheKey, run)
+}
+
+const identityKey = '0240c42181068275a4f996ee570ed7c7a97c30003b174461bca5bad882fc06143f'
+
+let byAttributes
+try {
+  byAttributes = await recover('attributes:deggen', options =>
+    identityClient.resolveByAttributes({
+      attributes: { userName: 'deggen' }
+    }, options)
+  )
+} catch (error) {
+  if (error.message !== PUBLIC_LOOKUP_FAILURE) throw error
+  byAttributes = await retry('attributes:deggen', options =>
+    identityClient.resolveByAttributes({
+      attributes: { userName: 'deggen' }
+    }, options)
+  )
+}
+
+const byIdentityKey = await recover('key:' + identityKey, options =>
+  identityClient.resolveByIdentityKey({
+    identityKey
+  }, options)
+)
 ```
 
 Key Concepts:
-- IdentityClient queries decentralized identity resolution services
-- resolveByAttributes() searches by user-defined attributes
-- Returns array of identity records with public keys
-- Enables human-readable addressing (username instead of key)
+- resolveByAttributes() searches by user-defined attributes such as userName
+- resolveByIdentityKey() searches certificates issued to one identity key
+- Both methods take the recovery options as the second argument
+- { useContacts: true } is an opt-in. Most callers leave Contacts off
+- contactErrorMode: 'fallback' keeps public discovery when Contacts fail
+- contactTimeoutMs: 2000 bounds the Contacts wait at 2 seconds
+- onContactError marks a partial result. Surface the fixed warning:
+  "Saved contacts are unavailable. Results may exclude saved contacts."
+- Do not put the raw wallet or contact error in that warning
+- A public lookup failure stays a failure. Retry the same query
+- Do not cache a failure, treat it as an empty success, or invent an identity
+- Cache only complete results: public lookup succeeded and Contacts did not fail
+- A successful empty list is complete and may be cached. A partial list may not
+- Ignore a late response, including a late cache write, after a newer query,
+  retry, or selection increments the query generation
+- A saved contact is local to this wallet. It is not a third-party certification
+
+React:
+- @bsv/identity-react 2.x adopts this recovery API for IdentitySearchField and
+  useIdentitySearch (searchError, contactWarning, retrySearch)
+- That package requires React 18 and Node 22, and @bsv/sdk 3.2.0 or later
+- https://github.com/bsv-blockchain/identity-react
 
 Identity System Architecture:
 - Decentralized identity attestation
 - Attributes can include: userName, email, domain, etc.
 - Multiple identity providers may return results
-- First result [0] is typically primary identity
+- First result [0] is typically the primary identity when the caller needs one record
 
 SKILL: Derive Identity Keys from Wallet
 ----------------------------------------
@@ -2035,9 +2127,11 @@ This training guide covers these essential BSV Blockchain development skills:
    - Spend/redeem tokens
 
 3. IDENTITY RESOLUTION
-   - Resolve identity keys by attributes
+   - Resolve by attributes and by identity key with { useContacts: true }
+   - Bound optional Contacts lookups at 2 seconds and warn on partial results
+   - Retry public lookup failures; cache only complete results
+   - Ignore late responses superseded by a newer query
    - Derive identity keys from wallet
-   - Manage counterparty relationships
 
 4. PAYMENT PROTOCOLS
    - Derive payment addresses (BRC-29)

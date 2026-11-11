@@ -157,11 +157,18 @@ export const topicsData: TopicData[] = [
     id: "identity",
     title: "Identity",
     icon: IdCard,
+    description: "IdentityClient in @bsv/sdk 3.2 resolves by attributes or identity key. Contacts lookups are optional and off by default: pass { useContacts: true } with contactErrorMode 'fallback' and contactTimeoutMs 2000. That deadline bounds the Contacts wait and does not cancel a wallet prompt. A Contacts failure still returns public results; show 'Saved contacts are unavailable. Results may exclude saved contacts.' Public lookup failures stay failures until you retry the same query. Cache only complete results, and ignore a late response after a newer query starts. React apps can use @bsv/identity-react 2.x (React 18, Node 22).",
     snippets: [
       {
         id: 'resolveIdentityKey',
-        title: "Resolve Identity Key",
-        explanation: "Resolve an identity key for a counterparty.",
+        title: "Resolve by attributes",
+        explanation: "Resolve the username deggen. Contacts are optional: this passes { useContacts: true } and bounds that lookup at 2 seconds. If Contacts fail or time out, public results still return and the card logs 'Saved contacts are unavailable. Results may exclude saved contacts.' A public lookup failure reports 'Identity lookup failed. Check wallet access and try again.' retryResolveIdentityKey repeats that same query.",
+        code: resolveIdentityKey
+      },
+      {
+        id: 'resolveKnownIdentityKey',
+        title: "Resolve by identity key",
+        explanation: "Resolve a known identity key with the same { useContacts: true } recovery options. A public lookup failure retries the same query and is not stored as an empty result. Only a complete result is cached. A newer query ignores a late response from the previous one.",
         code: resolveIdentityKey
       },
     ]

@@ -17,7 +17,7 @@ export type WalletBridgeDecision =
 const MOBILE_WALLET_TIMEOUT_MS = 60_000
 
 /**
- * @bsv/sdk 2.8 auto-discovery waits one second and accepts only a React Native
+ * Built-in @bsv/sdk auto-discovery waits one second and accepts only a React Native
  * response status of "success". Mobile shells answer "ok" and often take longer
  * than that, so discovery reports that no wallet exists. An injected window.CWI
  * is bound directly. A bare ReactNativeWebView bridge accepts "ok" and "success".

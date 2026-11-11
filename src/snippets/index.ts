@@ -24,7 +24,7 @@ import { receiveMessage } from './messages/receive-message'
 import { acknowledgeMessage } from './messages/acknowledge-message'
 import { createCertificate } from './certificates/create-certificate'
 import { existingCertificate } from './certificates/existing-certificate'
-import { resolveIdentityKey } from './identity/resolve-identity-key'
+import { resolveIdentityKey, resolveKnownIdentityKey } from './identity/resolve-identity-key'
 import { payToIdentity } from './payments/pay-to-identity'
 import { createPaymentTransaction } from './payments/create-payment-transaction'
 import { internalizePayment } from './payments/internalize-payment'
@@ -95,6 +95,7 @@ export default {
     createCertificate,
     existingCertificate,
     resolveIdentityKey,
+    resolveKnownIdentityKey,
     payToIdentity,
     createPaymentTransaction,
     internalizePayment,
